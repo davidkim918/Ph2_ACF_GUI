@@ -118,8 +118,7 @@ class SimplifiedMainWidget(QWidget):
 		##  Testing some things out #######
 		##################################
 		self.simplifiedStatusBox = QGroupBox("Hello, {}!".format(self.TryUsername))
-		
-		
+
 		statusString, colorString = checkDBConnection(self.connection)
 		self.DBStatusLabel = QLabel()
 		self.DBStatusLabel.setText("Database connection:")

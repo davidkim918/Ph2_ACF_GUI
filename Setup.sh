@@ -1,4 +1,5 @@
-export Ph2_ACF_AREA=/home/RD53A/workspace/v4.0.2/Ph2_ACF
+#export Ph2_ACF_AREA=/home/RD53A/workspace/v4.0.2/Ph2_ACF
+export Ph2_ACF_AREA=/home/RD53A/workspace/RD53B/Ph2_ACF
 export DATA_dir=/home/RD53A/data/TestResults
 export GUI_dir=$PWD
 

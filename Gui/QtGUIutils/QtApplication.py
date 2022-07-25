@@ -97,7 +97,7 @@ class QtApplication(QWidget):
 		else:
 			print("This GUI supports Win/Linux/MacOS only")
 		self.show()
-
+	# Create log file for every firmware
 	def initLog(self):
 		for index, (firmwareName, fwAddress) in enumerate(FirmwareList.items()):
 			LogFileName = "{0}/Gui/.{1}.log".format(os.environ.get("GUI_dir"),firmwareName)

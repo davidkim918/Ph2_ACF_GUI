@@ -124,7 +124,9 @@ HWSettings_GenDACDAC = copy.deepcopy(HWSettings)
 
 HWSettings_Physics = copy.deepcopy(HWSettings)
 
-
+HWSettings_CROC = {
+"eventReadoutChipID"    :   0,
+}
 
 
 HWSettings_Dict = {
@@ -144,4 +146,33 @@ HWSettings_Dict = {
     'ChipIntVoltageTuning'       :    HWSettings_VoltageTuning,
     'GenericDAC-DAC'             :    HWSettings_GenDACDAC,
     'Physics'                    :    HWSettings_Physics,
+	'CROCThresholdOptimize'      :    HWSettings_CROC,
+    'CROCRegReader'              :    HWSettings_CROC,
+	'CROCRegTest'                :    HWSettings_CROC,
+	'CROCDigitalScan'            :    HWSettings_CROC,
+	'CROCAnalogScan'             :    HWSettings_CROC,
+	'CROCAnalogScanFast'         :    HWSettings_CROC,
+	'CROCAnalogScanSparse'       :    HWSettings_CROC,
+	'CROCThresholdScan'          :    HWSettings_CROC,
+	'CROCThresholdScanFast'      :    HWSettings_CROC,
+	'CROCThresholdScanSparse'    :    HWSettings_CROC,
+	'CROCThresholdEquilization'  :    HWSettings_CROC,
+	'CROCGlobalThresholdTuning'  :    HWSettings_CROC,
+	'CROCThresholdTuning'        :    HWSettings_CROC,
+    'CROCNoiseScan'              :    HWSettings_CROC,
+	'CROCStuckPixelScan'         :    HWSettings_CROC,
+	'CROCTimeWalkInjectionScan'  :    HWSettings_CROC,
+	'CROCTimeWalk'               :    HWSettings_CROC,
+	'CROCRingOsc'                :    HWSettings_CROC,
+	'CROCShortRingOsc'           :    HWSettings_CROC,
+	'CROCMuxScan'                :    HWSettings_CROC,
+	'CROCIVScan'                 :    HWSettings_CROC,
+	'CROCADCScan'                :    HWSettings_CROC,
+	'CROCDACScan'                :    HWSettings_CROC,
+	'CROCTempSensor'             :    HWSettings_CROC,
+	'CROCShortTempSensor'        :    HWSettings_CROC,
+	'CROCVrefTrimming'           :    HWSettings_CROC,
+	'CROCCapMeasureScan'         :    HWSettings_CROC,
+	'CROCCapMeasure'             :    HWSettings_CROC,
+	'CROCBERscanTest'            :    HWSettings_CROC,
 }

@@ -53,6 +53,9 @@ FESettings = {
 'TEMPSENS_IDEAL_FACTOR' : "1225",
 }
 
+CROCSettings = {
+
+}
 
 FESettings_Dict = {
     'Latency'                   :    FESettings,
@@ -67,4 +70,33 @@ FESettings_Dict = {
     'InjectionDelay'            :    FESettings,
     'ClockDelay'                :    FESettings,
     'Physics'                   :    FESettings,
+	'CROCThresholdOptimize'     :    CROCSettings,
+    'CROCRegReader'             :    CROCSettings,
+	'CROCRegTest'               :    CROCSettings,
+	'CROCDigitalScan'           :    CROCSettings,
+	'CROCAnalogScan'            :    CROCSettings,
+	'CROCAnalogScanFast'        :    CROCSettings,
+	'CROCAnalogScanSparse'      :    CROCSettings,
+	'CROCThresholdScan'         :    CROCSettings,
+	'CROCThresholdScanFast'     :    CROCSettings,
+	'CROCThresholdScanSparse'   :    CROCSettings,
+	'CROCThresholdEquilization' :    CROCSettings,
+	'CROCGlobalThresholdTuning' :    CROCSettings,
+	'CROCThresholdTuning'       :    CROCSettings,
+    'CROCNoiseScan'             :    CROCSettings,
+	'CROCStuckPixelScan'        :    CROCSettings,
+	'CROCTimeWalkInjectionScan' :    CROCSettings,
+	'CROCTimeWalk'              :    CROCSettings,
+	'CROCRingOsc'               :    CROCSettings,
+	'CROCShortRingOsc'          :    CROCSettings,
+	'CROCMuxScan'               :    CROCSettings,
+	'CROCIVScan'                :    CROCSettings,
+	'CROCADCScan'               :    CROCSettings,
+	'CROCDACScan'               :    CROCSettings,
+	'CROCTempSensor'            :    CROCSettings,
+	'CROCShortTempSensor'       :    CROCSettings,
+	'CROCVrefTrimming'          :    CROCSettings,
+	'CROCCapMeasureScan'        :    CROCSettings,
+	'CROCCapMeasure'            :    CROCSettings,
+	'CROCBERscanTest'           :    CROCSettings,
 }

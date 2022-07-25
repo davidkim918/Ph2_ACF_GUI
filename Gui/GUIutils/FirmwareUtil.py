@@ -128,11 +128,13 @@ FwStatusCheck = {
 FEPowerUpVD = {
 	"Direct"		  :  [1.15, 1.25],
 	"SLDO"			  :  [1.75, 1.82],
+  "CROC"				: [1.60, 1.65],
 }
 
 FEPowerUpVA = {
 	"SLDO"			  :  [1.75, 1.82],
-	"Direct"		  :  [1.15, 1.25]	
+	"Direct"		  :  [1.15, 1.25],
+  "CROC"				: [1.60, 1.65],
 }
 
 FEPowerUpAmp = {

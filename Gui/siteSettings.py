@@ -7,6 +7,7 @@ defaultFC7 = "fc7.board.1"
 defaultFC7IP = '192.168.1.80'
 # default fpga config
 defaultFPGAConfig = 'IT-uDTC_L12-KSU-3xQUAD_L8-KSU2xQUAD_x1G28'
+#IT-uDTC_L12-KSU-3xQUAD_L8-KSU-2xQUAD_ELECTRICAL_RD53A
 # default FMC board number
 defaultFMC = '0'
 # default USB port for HV power supply
@@ -20,12 +21,13 @@ defaultLVModel = ["KeySight E3633 (RS232)"]
 # default model for LV power supply
 defaultLVModel = ["KeySight E3633 (RS232)"]
 # default setting for module ( "SingleSCC","TFPX Quad","TEPX Quad","TBPX Quad","Yellow Module (Purdue)"):
-defaultModuleType = "SingleSCC"
+defaultModuleType = "Yellow Module (Purdue)"
 # default mode for LV powering (Direct,SLDO,etc)
 defaultPowerMode = "Direct"
 defaultVoltageMap = {
     "Direct" : 1.28,
-    "SLDO"   : 1.90
+    "SLDO"   : 1.90,
+    "CROC" : 1.60
 }
 #default BaudRate for Arduino sensor
 defaultSensorBaudRate = 115200

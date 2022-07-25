@@ -225,7 +225,7 @@ def SetMonitoring(Node, MonitoringItem):
   Node_MonitoringElements = SetNodeAttribute(Node_MonitoringElements,MonitoringItem.MonitoringList)
   return Node
 
-def GenerateHWDescriptionXML(HWDescription,outputFile = "CMSIT_gen.xml"):
+def GenerateHWDescriptionXML(HWDescription,outputFile = "CMSIT_gen.xml", useCROC = False):
   Node_HWInterface = ET.Element('HwDescription')
   BeBoardList = HWDescription.BeBoardList
   for BeBoard in BeBoardList:
@@ -255,7 +255,7 @@ def GenerateHWDescriptionXML(HWDescription,outputFile = "CMSIT_gen.xml"):
         Node_FEPath = SetNodeAttribute(Node_FEPath,{'file':HyBridModule.File_Path})
         FEList = HyBridModule.FEList
         for FE in FEList:
-          Node_FE = ET.SubElement(Node_HyBrid, BeBoard.boardType)
+          Node_FE = ET.SubElement(Node_HyBrid, "CROC" if useCROC else BeBoard.boardType)
           Node_FE = SetNodeAttribute(Node_FE,{'Id':FE.Id,'Lane':FE.Lane,'configfile':FE.configfile})
           Node_FESetting = ET.SubElement(Node_FE,"Settings")
           Node_FESetting = SetNodeAttribute(Node_FESetting,FE.settingList)

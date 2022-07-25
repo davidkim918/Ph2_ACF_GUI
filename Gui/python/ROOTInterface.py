@@ -115,8 +115,13 @@ def GetBinary(fileName):
 	binaryData = ROOT.TFile(fileName)
 	return binaryData	
 
+def Hist2CSV(outputDir, hist, name = None):
+  pass
+  #Take a 2D histogram from a ROOT file and convert that into a .csv file.
+
+
 if __name__ == "__main__":
-	nodes =  GetDirectory("/Users/czkaiweb/Research/data/Run0060_ThrMinimization.root")
+	nodes =  GetDirectory("/home/RD53A/workspace/RD53B/Ph2_ACF/test/Results/DigitalScan_5/results.root")
 	showDirectory(nodes)
 			
 

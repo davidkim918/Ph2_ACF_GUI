@@ -59,7 +59,23 @@ ModuleType = {
 	2	:	"TFPX Quad",
 	3	:	"TEPX Quad",
 	4	:	"TBPX Quad",
-	5   : 	"Yellow Module (Purdue)"
+	5	: 	"Yellow Module (Purdue)",
+	6	:	"RD53B"
+}
+# These are the values the identifiers should start with for each module
+ModuleID = {
+	"SingleSCC" : "00",
+	"TFPX Quad" : "01",
+	"TEPX Quad" : "02",
+	"TBPX Quad" : "03",
+	"Yellow Module (Purdue)" : "04",
+	"RD53B" : "05"
+}
+
+IT_uTDC_firmware_image = {
+	"SingleSCC" : "IT4_02__RD53A_x1G28.bit",
+	"Yellow Module (Purdue)" : "IT_L8-KSU2QUAD_EL_1G28.bit",
+	"RD53B" : "IT_L12K4SCC_ELE_CROC.bit"
 }
 
 ModuleLaneMap = {
@@ -67,7 +83,8 @@ ModuleLaneMap = {
 	"TEPX Quad": {"0":"0","1":"1","2":"2","3":"3"},
 	"TBPX Quad": {"0":"4","1":"5","2":"6","3":"7"},
 	"SingleSCC": {"0":"0"},
-	"Yellow Module (Purdue)" : {"0":"6","1":"5","2":"7","3":"0"}
+	"Yellow Module (Purdue)" : {"0":"6","1":"5","2":"7","3":"0"},
+	"RD53B":	{"0":"15"}
 }
 
 BoxSize = {
@@ -76,6 +93,7 @@ BoxSize = {
 	"TEPX Quad" : 4,
 	"TBPX Quad"	: 4,
 	"Yellow Module (Purdue)": 3,
+	"RD53B"	: 1,
 }
 
 HVPowerSupplyModel = {
@@ -141,6 +159,35 @@ Test = {
 	'ChipIntVoltageTuning'   :  'voltagetuning',
 	'GenericDAC-DAC'         :  'gendacdac',
 	'Physics'                :  'physics',
+	'CROCThresholdOptimize'  :  'ThresholdTuning ThresholdScanFast',
+	'CROCRegReader'          :  'RegReader',
+	'CROCRegTest'            :  'RegTest',
+	'CROCDigitalScan'        :  'DigitalScan',
+	'CROCAnalogScan'         :  'AnalogScan',
+	'CROCAnalogScanFast'     :  'AnalogScanFast',
+	'CROCAnalogScanSparse'   :  'AnalogScanSparse',
+	'CROCThresholdScan'      :  'ThresholdScan',
+	'CROCThresholdScanFast'  :  'ThresholdScanFast',
+	'CROCThresholdScanSparse':  'ThresholdScanSparse',
+	'CROCThresholdEquilization': 'ThresholdEquilization',
+	'CROCGlobalThresholdTuning': 'GlobalThresholdTuning',
+	'CROCThresholdTuning'     :  'ThresholdTuning',
+	'CROCNoiseScan'           :  'NoiseScan',
+	'CROCStuckPixelScan'      :  'StuckPixelScan',
+	'CROCTimeWalkInjectionScan': 'TimeWalkInjectionScan',
+	'CROCTimeWalk'            :  'TimeWalk',
+	'CROCRingOsc'             :  'RingOsc',
+	'CROCShortRingOsc'        :  'ShortRingOsc',
+	'CROCMuxScan'             :  'MuxScan',
+	'CROCIVScan'              :  'IVScan',
+	'CROCADCScan'             :  'ADCScan',
+	'CROCDACScan'             :  'DACScan',
+	'CROCTempSensor'          :  'TempSensor',
+	'CROCShortTempSensor'     :  'ShortTempSensor',
+	'CROCVrefTrimming'        :  'VrefTrimming',
+	'CROCCapMeasureScan'      :  'CapMeasureScan',
+	'CROCCapMeasure'          :  'CapMeasure',
+	'CROCBERscanTest'         :  'BERscanTest'
 }
 
 TestName2File = {
@@ -160,11 +207,45 @@ TestName2File = {
 	'ChipIntVoltageTuning'   :  'VoltageTuning',
 	'GenericDAC-DAC'         :  'GenDACDAC',
 	'Physics'                :  'Physics',
+	'CROCThresholdOptimize'  :  'ThresholdOptimize',
+	'CROCRegReader'          :  'RegReader',
+	'CROCRegTest'            :  'RegTest',
+	'CROCDigitalScan'        :  'DigitalScan',
+	'CROCAnalogScan'         :  'AnalogScan',
+	'CROCAnalogScanFast'     :  'AnalogScanFast',
+	'CROCAnalogScanSparse'   :  'AnalogScanSparse',
+	'CROCThresholdScan'      :  'ThresholdScan',
+	'CROCThresholdScanFast'  :  'ThresholdScanFast',
+	'CROCThresholdScanSparse':  'ThresholdScanSparse',
+	'CROCThresholdEquilization': 'ThresholdEquilization',
+	'CROCGlobalThresholdTuning': 'GlobalThresholdTuning',
+	'CROCThresholdTuning'     :  'ThresholdTuning',
+	'CROCNoiseScan'           :  'NoiseScan',
+	'CROCStuckPixelScan'      :  'StuckPixelScan',
+	'CROCTimeWalkInjectionScan': 'TimeWalkInjectionScan',
+	'CROCTimeWalk'            :  'TimeWalk',
+	'CROCRingOsc'             :  'RingOsc',
+	'CROCShortRingOsc'        :  'ShortRingOsc',
+	'CROCMuxScan'             :  'MuxScan',
+	'CROCIVScan'              :  'IVScan',
+	'CROCADCScan'             :  'ADCScan',
+	'CROCDACScan'             :  'DACScan',
+	'CROCTempSensor'          :  'TempSensor',
+	'CROCShortTempSensor'     :  'ShortTempSensor',
+	'CROCVrefTrimming'        :  'VrefTrimming',
+	'CROCCapMeasureScan'      :  'CapMeasureScan',
+	'CROCCapMeasure'          :  'CapMeasure',
+	'CROCBERscanTest'         :  'BERscanTest',
 }
 
 SingleTest = ['Latency','PixelAlive','NoiseScan','SCurveScan','GainScan',
 	'ThresholdEqualization','GainOptimization','ThresholdMinimization',
 	'ThresholdAdjustment','InjectionDelay','ClockDelay','BitErrorRate','DataRBOptimization','ChipIntVoltageTuning','GenericDAC-DAC','Physics']
+CROCTestList = []
+for testkey in Test:
+	if 'CROC' in testkey:
+		SingleTest.append(testkey)
+		CROCTestList.append(Test[testkey])
 
 CompositeTest = ['AllScan','QuickTest','StandardStep1','StandardStep2','StandardStep3','StandardStep4']
 CompositeList = {

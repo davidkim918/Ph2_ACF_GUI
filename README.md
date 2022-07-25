@@ -1,4 +1,7 @@
 # Ph2_ACF_GUI
+
+This is the version that incorporates RD53B testings.  This is still in the development stage.
+
 Grading GUI for CMS Tracker Phase2 Acquisition &amp; Control Framework
 
 Uses the following python packages: PyQt5 (https://pypi.org/project/PyQt5/), pyqt-darktheme (https://pypi.org/project/pyqt-darktheme/)

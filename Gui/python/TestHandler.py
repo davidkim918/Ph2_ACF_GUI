@@ -64,6 +64,10 @@ class TestHandler(QObject):
 		self.firmwareName = self.firmware.getBoardName()
 		self.ModuleMap = dict()
 		self.ModuleType = self.firmware.getModuleByIndex(0).getModuleType()
+		self.firmwareImage = IT_uTDC_firmware_image[self.ModuleType]
+		self.useCROC = False
+		if self.ModuleType == "RD53B":
+			self.useCROC = True
 		self.RunNumber = "-1"
 		self.IVCurveHandler = None
 		self.SLDOScanHandler = None
@@ -104,6 +108,11 @@ class TestHandler(QObject):
 		self.info_process = QProcess(self)
 		self.info_process.readyReadStandardOutput.connect(self.on_readyReadStandardOutput_info)
 
+		##---Adding firmware setting-----
+		self.fw_process = QProcess(self)
+		self.fw_process.readyReadStandardOutput.connect(self.on_readyReadStandardOutput)
+		#self.fw_process.finished.connect(self.on_finish)
+
 		self.haltSignal.connect(self.runwindow.finish)
 		self.outputString.connect(self.runwindow.updateConsoleInfo)
 		self.stepFinished.connect(self.runwindow.finish)
@@ -136,8 +145,12 @@ class TestHandler(QObject):
 				self.RunNumber = runNumberText[0].split('\n')[0]
 				logger.info("RunNumber: {}".format(self.RunNumber))
 		except:
-			logger.warning("Failed to retrive RunNumber")
-		
+			logger.warning("Failed to retrieve RunNumber")
+
+		try:
+			os.system("cp {0}/settings/RD53BTools.toml {0}/test/RD53BTools.toml".format(os.environ.get("Ph2_ACF_AREA")))
+		except:
+			print("Can not copy the TOML files {0}/settings/RD53BTools.toml to {0}/test/RD53BTools.toml".format(os.environ.get("Ph2_ACF_AREA")))
 
 		if self.currentTest == "" and isCompositeTest(self.info[1]):
 			testName = CompositeList[self.info[1]][0]
@@ -155,11 +168,14 @@ class TestHandler(QObject):
 
 		for key in self.rd53_file.keys():
 			if self.rd53_file[key] == None:
-				self.rd53_file[key] = os.environ.get('Ph2_ACF_AREA')+"/settings/RD53Files/CMSIT_RD53.txt"
+				if self.useCROC:
+					self.rd53_file[key] = os.environ.get('Ph2_ACF_AREA')+"/settings/RD53B.toml"
+				else:
+					self.rd53_file[key] = os.environ.get('Ph2_ACF_AREA')+"/settings/RD53Files/CMSIT_RD53.txt"
 		if self.input_dir == "":
-			SetupRD53ConfigfromFile(self.rd53_file,self.output_dir)
+			SetupRD53ConfigfromFile(self.rd53_file,self.output_dir,useCROC = self.useCROC)
 		else:
-			SetupRD53Config(self.input_dir,self.output_dir, self.rd53_file)
+			SetupRD53Config(self.input_dir,self.output_dir, self.rd53_file,useCROC = self.useCROC)
 
 		if self.input_dir == "":
 			if self.config_file == "":
@@ -173,15 +189,15 @@ class TestHandler(QObject):
 				config_file = GenerateXMLConfig(self.firmware,self.currentTest,tmpDir)
 				#config_file = os.environ.get('GUI_dir')+ConfigFiles.get(testName, "None")
 				if config_file:
-					SetupXMLConfigfromFile(config_file,self.output_dir,self.firmwareName,self.rd53_file)
+					SetupXMLConfigfromFile(config_file,self.output_dir,self.firmwareName,self.rd53_file,useCROC = self.useCROC)
 				else:
 					logger.warning("No Valid XML configuration file")
 				#QMessageBox.information(None,"Noitce", "Using default XML configuration",QMessageBox.Ok)
 			else:
-				SetupXMLConfigfromFile(self.config_file,self.output_dir,self.firmwareName,self.rd53_file)
+				SetupXMLConfigfromFile(self.config_file,self.output_dir,self.firmwareName,self.rd53_file,useCROC = self.useCROC)
 		else:
 			if self.config_file != "":
-				SetupXMLConfigfromFile(self.config_file,self.output_dir,self.firmwareName,self.rd53_file)
+				SetupXMLConfigfromFile(self.config_file,self.output_dir,self.firmwareName,self.rd53_file,useCROC = self.useCROC)
 			else:
 				tmpDir = os.environ.get('GUI_dir') + "/Gui/.tmp"
 				if not os.path.isdir(tmpDir)  and os.environ.get('GUI_dir'):
@@ -193,7 +209,7 @@ class TestHandler(QObject):
 				config_file = GenerateXMLConfig(self.firmware,self.currentTest,tmpDir)
 				#config_file = os.environ.get('GUI_dir')+ConfigFiles.get(testName, "None")
 				if config_file:
-					SetupXMLConfigfromFile(config_file,self.output_dir,self.firmwareName,self.rd53_file)
+					SetupXMLConfigfromFile(config_file,self.output_dir,self.firmwareName,self.rd53_file,useCROC = self.useCROC)
 				else:
 					logger.warning("No Valid XML configuration file")
 
@@ -207,11 +223,20 @@ class TestHandler(QObject):
 		return
 
 	def saveConfigs(self):
-		for key in self.rd53_file.keys():
-			try:
-				os.system("cp {0}/test/CMSIT_RD53_{1}.txt {2}/CMSIT_RD53_{1}_OUT.txt".format(os.environ.get("Ph2_ACF_AREA"),key,self.output_dir))
-			except:
-				print("Failed to copy {0}/test/CMSIT_RD53_{1}.txt {2}/CMSIT_RD53_{1}_OUT.txt".format(os.environ.get("Ph2_ACF_AREA"),key,self.output_dir))
+		if self.useCROC:
+			for key in self.rd53_file.keys():
+				try:
+					os.system("cp {0}/test/RD53B.toml {2}/RD53B_{3}_{4}_{5}.toml".format(os.environ.get("Ph2_ACF_AREA"), key, self.output_dir, self.info[1],key.split("_")[1],self.RunNumber) )
+			#	try:
+			#		os.system("cp {0}/test/CMSIT_RD53_{1}.toml {2}/CMSIT_RD53_{1}_OUT.toml".format(os.environ.get("Ph2_ACF_AREA"),key,self.output_dir))
+				except:
+					print("Failed to copy {0}/test/CMSIT_RD53_{1}.toml {2}/CMSIT_RD53_{1}_OUT.toml".format(os.environ.get("Ph2_ACF_AREA"),key,self.output_dir))
+		else:
+			for key in self.rd53_file.keys():
+				try:
+					os.system("cp {0}/test/CMSIT_RD53_{1}.txt {2}/CMSIT_RD53_{1}_OUT.txt".format(os.environ.get("Ph2_ACF_AREA"),key,self.output_dir))
+				except:
+					print("Failed to copy {0}/test/CMSIT_RD53_{1}.txt {2}/CMSIT_RD53_{1}_OUT.txt".format(os.environ.get("Ph2_ACF_AREA"),key,self.output_dir))
 
 	def resetConfigTest(self):
 		self.input_dir = ""
@@ -272,7 +297,8 @@ class TestHandler(QObject):
 			self.SLDOScanHandler.SLDOScan()
 			return
 			
-
+		#self.firmwareImage = IT_uTDC_firmware_image[self.ModuleType]
+		#print('The firmware image is {}'.format(self.firmwareImage))
 		self.starttime = None
 		self.ProgressingMode = "None"
 		self.currentTest = testName
@@ -299,8 +325,29 @@ class TestHandler(QObject):
 		#self.run_process.start("tail" , ["-n","6000", "/Users/czkaiweb/Research/Ph2_ACF_GUI/Gui/forKai.txt"])
 		#self.run_process.start("./SignalGenerator")
 
+		self.fw_process.setProcessChannelMode(QtCore.QProcess.MergedChannels)
+		self.fw_process.setWorkingDirectory(os.environ.get("Ph2_ACF_AREA")+"/test/")
+		print('firmware to be used is {}'.format(self.firmwareImage))
+		#self.fw_process.start("echo", ["fpgaconfig","-c","CMSIT.xml", "-i", "{}".format(self.firmwareImage)])
+		#-----Loading correct firmware for the given module type---------#
+		"""if "RD53B" in self.ModuleType:
+			self.fw_process.start("fpgaconfig",["-c","CROC.xml","-i", "{}".format(self.firmwareImage)])
+			self.fw_process.waitForFinished()
+			self.fw_process.start("RD53BminiDAQ",["-f","CROC.xml","-r"])
+			self.fw_process.waitForFinished()	
+		else:
+			self.fw_process.start("fpgaconfig",["-c","CMSIT.xml","-i", "{}".format(self.firmwareImage)])
+			self.fw_process.waitForFinished()
+			self.fw_process.start("CMSITminiDAQ",["-f","CMSIT.xml","-r"])
+			self.fw_process.waitForFinished()"""
+		#-----------------------------------------------------------------#
+
 		if Test[self.currentTest] in ["pixelalive","noise","latency","injdelay","clockdelay","threqu","thrmin","scurve","gainopt","thradj","physics","gain"]:
 			self.run_process.start("CMSITminiDAQ", ["-f","CMSIT.xml", "-c", "{}".format(Test[self.currentTest])])
+		elif Test[self.currentTest] in ["DigitalScan","ThresholdTuning","ThresholdScanFast"]:
+			self.run_process.start("RD53BminiDAQ", ["-h", "-f", "CROC.xml", "-t", "RD53BTools.toml", "{}".format(Test[self.currentTest])])
+		elif self.useCROC:
+			self.run_process.start("RD53BminiDAQ", ["-h", "-f", "CROC.xml", "-t", "RD53BTools.toml", "{}".format(Test[self.currentTest])])
 		else:
 			self.info_process.start("echo",["test {} not runnable, quitting...".format(Test[self.currentTest])])
 	
@@ -323,7 +370,7 @@ class TestHandler(QObject):
 
 
 	def abortTest(self):
-		reply = QMessageBox.question(None, "Abort", "Are you sure to abort?", QMessageBox.No | QMessageBox.Yes, QMessageBox.No)
+		reply = QMessageBox.question(None, "Abort", "Are you sure you want to abort?", QMessageBox.No | QMessageBox.Yes, QMessageBox.No)
 
 		if reply == QMessageBox.Yes:
 			self.halt = True
@@ -370,17 +417,25 @@ class TestHandler(QObject):
 			QMessageBox.critical(self,"Error","Process not finished",QMessageBox.Ok)
 			return
 
-		try:
-			if self.RunNumber == "-1":
-				os.system("cp {0}/test/Results/Run000000*.root {1}/".format(os.environ.get("Ph2_ACF_AREA"),self.output_dir))
-				#os.system("cp {0}/test/Results/Run000000*.txt {1}/".format(os.environ.get("Ph2_ACF_AREA"),self.output_dir))
-				#os.system("cp {0}/test/Results/Run000000*.xml {1}/".format(os.environ.get("Ph2_ACF_AREA"),self.output_dir))
-			else:
-				os.system("cp {0}/test/Results/Run{1}*.root {2}/".format(os.environ.get("Ph2_ACF_AREA"),self.RunNumber,self.output_dir))
-				#os.system("cp {0}/test/Results/Run{1}*.txt {2}/".format(os.environ.get("Ph2_ACF_AREA"),self.RunNumber,self.output_dir))
-				#os.system("cp {0}/test/Results/Run{1}*.xml {2}/".format(os.environ.get("Ph2_ACF_AREA"),self.RunNumber,self.output_dir))
-		except:
-			print("Failed to copy file to output directory")
+		if self.useCROC:
+			try:
+				os.system("cp {0}/test/Results/*/*.root {1}/".format(os.environ.get("Ph2_ACF_AREA"),self.output_dir))
+				os.system("rm -rf {0}/test/Results/* ".format(os.environ.get("Ph2_ACF_AREA")))
+			except:
+				print("Failde to copy ROOT file to output directory")
+		
+		else:
+			try:
+				if self.RunNumber == "-1":
+					os.system("cp {0}/test/Results/Run000000*.root {1}/".format(os.environ.get("Ph2_ACF_AREA"),self.output_dir))
+					#os.system("cp {0}/test/Results/Run000000*.txt {1}/".format(os.environ.get("Ph2_ACF_AREA"),self.output_dir))
+					#os.system("cp {0}/test/Results/Run000000*.xml {1}/".format(os.environ.get("Ph2_ACF_AREA"),self.output_dir))
+				else:
+					os.system("cp {0}/test/Results/Run{1}*.root {2}/".format(os.environ.get("Ph2_ACF_AREA"),self.RunNumber,self.output_dir))
+					#os.system("cp {0}/test/Results/Run{1}*.txt {2}/".format(os.environ.get("Ph2_ACF_AREA"),self.RunNumber,self.output_dir))
+					#os.system("cp {0}/test/Results/Run{1}*.xml {2}/".format(os.environ.get("Ph2_ACF_AREA"),self.RunNumber,self.output_dir))
+			except:
+				print("Failed to copy file to output directory")
 
 	def saveTestToDB(self):
 		if isActive(self.connection) and self.autoSave:
@@ -405,9 +460,9 @@ class TestHandler(QObject):
 						#print ("Module is {0}".format(module))
 						module_id = module.strip('Module')
 						#print ("Module_ID is {0}".format(module_id))
-						getConfigInFiles = subprocess.run('find {0} -mindepth 1  -maxdepth 1 -type f -name "CMSIT_RD53_{1}_*_IN.txt"  '.format(localDir,module_id), shell=True, stdout=subprocess.PIPE) #changed module_id to module
+						getConfigInFiles = subprocess.run('find {0} -mindepth 1  -maxdepth 1 -type f -name "CMSIT_RD53_{1}_*_IN.*"  '.format(localDir,module_id), shell=True, stdout=subprocess.PIPE) #changed module_id to module
 						configInFileList = getConfigInFiles.stdout.decode('utf-8').rstrip('\n').split('\n')
-						getConfigOutFiles = subprocess.run('find {0} -mindepth 1  -maxdepth 1 -type f -name "CMSIT_RD53_{1}_*_OUT.txt"  '.format(localDir,module_id), shell=True, stdout=subprocess.PIPE) #changed module_id to module
+						getConfigOutFiles = subprocess.run('find {0} -mindepth 1  -maxdepth 1 -type f -name "CMSIT_RD53_{1}_*_OUT.*"  '.format(localDir,module_id), shell=True, stdout=subprocess.PIPE) #changed module_id to module
 						configOutFileList = getConfigOutFiles.stdout.decode('utf-8').rstrip('\n').split('\n')
 						getXMLFiles = subprocess.run('find {0} -mindepth 1  -maxdepth 1 -type f -name "*.xml"  '.format(localDir), shell=True, stdout=subprocess.PIPE)
 						XMLFileList = getXMLFiles.stdout.decode('utf-8').rstrip('\n').split('\n')
@@ -507,11 +562,16 @@ class TestHandler(QObject):
 			print("Thread competition detected")
 			return
 		self.readingOutput = True
-		
+		fwtext = self.fw_process.readAllStandardOutput().data().decode()
 		alltext = self.run_process.readAllStandardOutput().data().decode()
+		self.outputfile.write(fwtext)
 		self.outputfile.write(alltext)
 		#outputfile.close()
-		textline = alltext.split('\n')
+		mergetext = fwtext + alltext
+		textline = mergetext.split('\n')
+
+		#textline = alltext.split('\n')
+		
 		#fileLines = open(self.outputFile,"r")
 		#textline = fileLines.readlines()
 
@@ -536,6 +596,14 @@ class TestHandler(QObject):
 						if self.ProgressValue == 100:
 							self.ProgressingMode = "Summary"
 						self.runwindow.ResultWidget.ProgressBar[self.testIndexTracker].setValue(self.ProgressValue)										
+					except:
+						pass
+				if "% [" in textStr:
+					try:
+						self.ProgressValue = float(textStr.split("%")[0].split(" ")[-1])
+						if self.ProgressValue == 100:
+							self.ProgressingMode = "Summary"
+						self.runwindow.ResultWidget.ProgressBar[self.testIndexTracker].setValue(self.ProgressValue)	
 					except:
 						pass
 					
@@ -567,11 +635,12 @@ class TestHandler(QObject):
 										
 			elif "@@@ Initializing the Hardware @@@" in textStr:
 				self.ProgressingMode = "Configure"
-			elif "@@@ Performing" in textStr:
+			elif "@@@ Performing" in textStr or "===== Configuring frontend chip registers =====" in textStr:
 				self.ProgressingMode = "Perform"
 				self.outputString.emit('<b><span style="color:#ff0000;"> Performing the {} test </span></b>'.format(self.currentTest))
 
-			text = textStr.encode('ascii')
+			#text = textStr.encode('ascii')
+			text = textStr.encode("utf-8")
 			numUpAnchor, text = parseANSI(text)
 			#if numUpAnchor > 0:
 			#	textCursor = self.ConsoleView.textCursor()
@@ -592,6 +661,7 @@ class TestHandler(QObject):
 
 	def updateNeeded(self,textStr):
 		currentTest = Test[self.currentTest]
+		
 		if  currentTest in ["thradj","thrmin"] and "Global threshold for" in textStr:
 			return True,"Vthreshold_LIN",-1
 		elif currentTest in ["gainopt"] and "Krummenacher Current" in textStr:

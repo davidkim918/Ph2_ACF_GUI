@@ -11,7 +11,6 @@
 #import config
 #import database
 import sys
-#import tkinter as tk
 import os
 import re
 import operator
@@ -19,14 +18,12 @@ import math
 import hashlib
 from queue import Queue, Empty
 from threading import Thread
-#from tkinter import ttk
 from datetime import datetime, timedelta
 from subprocess import Popen, PIPE
 from itertools import islice
 from textwrap import dedent
-from PIL import ImageTk, Image
+#from PIL import ImageTk, Image
 from functools import partial
-#from tkinter import scrolledtext 
 
 from  Gui.GUIutils.settings import *
 from  Gui.GUIutils.DBConnection import *
@@ -125,7 +122,7 @@ def SetupXMLConfig(Input_Dir, Output_Dir):
 ##########################################################################
 ##########################################################################
 
-def SetupXMLConfigfromFile(InputFile, Output_Dir, firmwareName, RD53Dict):
+def SetupXMLConfigfromFile(InputFile, Output_Dir, firmwareName, RD53Dict, useCROC = False):
 	changeMade = False
 	try:
 		root,tree = LoadXML(InputFile)
@@ -137,7 +134,11 @@ def SetupXMLConfigfromFile(InputFile, Output_Dir, firmwareName, RD53Dict):
 
 
 		counter = 0
-		for Node in root.findall(".//RD53"):
+		if useCROC:
+			FENodeString = ".//CROC"
+		else:
+			FENodeString = ".//RD53"
+		for Node in root.findall(FENodeString):
 			ParentNode = Node.getparent() #.getparent()
 			try:
 				ChipKey = "{}_{}_{}".format(ParentNode.attrib["Name"],ParentNode.attrib["Id"],Node.attrib["Id"])
@@ -191,47 +192,86 @@ def SetupXMLConfigfromFile(InputFile, Output_Dir, firmwareName, RD53Dict):
 	except Exception as error:
 		print("Failed to set up the XML file, {}".format(error))
 
-	try:
-		os.system("cp {0} {1}/CMSIT.xml".format(InputFile,Output_Dir))
-	except OSError:
-		print("Can not copy the XML files {0} to {1}".format(InputFile,Output_Dir))
-	try:
-		os.system("cp {0}/CMSIT.xml  {1}/test/CMSIT.xml".format(Output_Dir,os.environ.get("Ph2_ACF_AREA")))
-	except OSError:
-		print("Can not copy {0}/CMSIT.xml to {1}/test/CMSIT.xml".format(Output_Dir,os.environ.get("Ph2_ACF_AREA")))
+	if useCROC:
+		try:
+			os.system("cp {0} {1}/CROC.xml".format(InputFile,Output_Dir))
+		except OSError:
+			print("Can not copy the XML files {0} to {1}".format(InputFile,Output_Dir))
+		try:
+			os.system("cp {0}/CROC.xml  {1}/test/CROC.xml".format(Output_Dir,os.environ.get("Ph2_ACF_AREA")))
+		except OSError:
+			print("Can not copy {0}/CROC.xml to {1}/test/CROC.xml".format(Output_Dir,os.environ.get("Ph2_ACF_AREA")))
+	else:
+		try:
+			os.system("cp {0} {1}/CMSIT.xml".format(InputFile,Output_Dir))
+		except OSError:
+			print("Can not copy the XML files {0} to {1}".format(InputFile,Output_Dir))
+		try:
+			os.system("cp {0}/CMSIT.xml  {1}/test/CMSIT.xml".format(Output_Dir,os.environ.get("Ph2_ACF_AREA")))
+		except OSError:
+			print("Can not copy {0}/CMSIT.xml to {1}/test/CMSIT.xml".format(Output_Dir,os.environ.get("Ph2_ACF_AREA")))
 
 ##########################################################################
 ##########################################################################
 
-def SetupRD53Config(Input_Dir, Output_Dir, RD53Dict):
-	for key in RD53Dict.keys():
-		try:
-			os.system("cp {0}/CMSIT_RD53_{1}_OUT.txt {2}/CMSIT_RD53_{1}_IN.txt".format(Input_Dir,key,Output_Dir))
-		except OSError:
-			print("Can not copy the RD53 configuration files to {0} for RD53 ID: {1}".format(Output_Dir, key))
-		try:
-			os.system("cp {0}/CMSIT_RD53_{1}_IN.txt  {2}/test/CMSIT_RD53_{1}.txt".format(Output_Dir,key,os.environ.get("Ph2_ACF_AREA")))
-		except OSError:
-			print("Can not copy {0}/CMSIT_RD53_{1}_IN.txt to {2}/test/CMSIT_RD53_{1}.txt".format(Output_Dir,key,os.environ.get("Ph2_ACF_AREA")))
+def SetupRD53Config(Input_Dir, Output_Dir, RD53Dict, useCROC = False):
+	if not useCROC:
+		for key in RD53Dict.keys():
+			try:
+				os.system("cp {0}/CMSIT_RD53_{1}_OUT.txt {2}/CMSIT_RD53_{1}_IN.txt".format(Input_Dir,key,Output_Dir))
+			except OSError:
+				print("Can not copy the RD53 configuration files to {0} for RD53 ID: {1}".format(Output_Dir, key))
+			try:
+				os.system("cp {0}/CMSIT_RD53_{1}_IN.txt  {2}/test/CMSIT_RD53_{1}.txt".format(Output_Dir,key,os.environ.get("Ph2_ACF_AREA")))
+			except OSError:
+				print("Can not copy {0}/CMSIT_RD53_{1}_IN.txt to {2}/test/CMSIT_RD53_{1}.txt".format(Output_Dir,key,os.environ.get("Ph2_ACF_AREA")))
+	else:
+		for key in RD53Dict.keys():
+			try:
+				os.system("cp {0}/CMSIT_RD53_{1}_OUT.toml {2}/CMSIT_RD53_{1}_IN.toml".format(Input_Dir,key,Output_Dir))
+			except OSError:
+				print("Can not copy the RD53 configuration files to {0} for RD53 ID: {1}".format(Output_Dir, key))
+			try:
+				os.system("cp {0}/CMSIT_RD53_{1}_IN.toml  {2}/test/CMSIT_RD53_{1}.toml".format(Output_Dir,key,os.environ.get("Ph2_ACF_AREA")))
+			except OSError:
+				print("Can not copy {0}/CMSIT_RD53_{1}_IN.toml to {2}/test/CMSIT_RD53_{1}.toml".format(Output_Dir,key,os.environ.get("Ph2_ACF_AREA")))
+
 
 ##########################################################################
 ##########################################################################
+##---This copies a default copy of the config file to the test directory-------
+def SetupRD53ConfigfromFile(InputFileDict, Output_Dir, useCROC = False):
+	if not useCROC:
+		for key in InputFileDict.keys():
+			try:
+				os.system("cp {0} {1}/CMSIT_RD53_{2}_IN.txt".format(InputFileDict[key],Output_Dir,key))
+			except OSError:
+				print("Can not copy the XML files {0} to {1}".format(InputFileDict[key],Output_Dir))
+			try:
+				os.system("cp {0}/CMSIT_RD53_{1}_IN.txt  {2}/test/CMSIT_RD53_{1}.txt".format(Output_Dir,key,os.environ.get("Ph2_ACF_AREA")))
+			except OSError:
+				print("Can not copy {0}/CMSIT_RD53_{1}_IN.txt to {2}/test/CMSIT_RD53.txt".format(Output_Dir,key,os.environ.get("Ph2_ACF_AREA")))
+	else:
+		for key in InputFileDict.keys():
+			try:
+				os.system("cp {0} {1}/CMSIT_RD53_{2}_IN.toml".format(InputFileDict[key],Output_Dir,key))
+			except OSError:
+				print("Can not copy the TOML files {0} to {1}".format(InputFileDict[key],Output_Dir))
+			try:
+				os.system("cp {0}/CMSIT_RD53_{1}_IN.toml  {2}/test/CMSIT_RD53_{1}.toml".format(Output_Dir,key,os.environ.get("Ph2_ACF_AREA")))
+			except OSError:
+				print("Can not copy {0}/CMSIT_RD53_{1}_IN.toml to {2}/test/CMSIT_RD53.toml".format(Output_Dir,key,os.environ.get("Ph2_ACF_AREA")))
 
-def SetupRD53ConfigfromFile(InputFileDict, Output_Dir):
-	for key in InputFileDict.keys():
-		try:
-			os.system("cp {0} {1}/CMSIT_RD53_{2}_IN.txt".format(InputFileDict[key],Output_Dir,key))
-		except OSError:
-			print("Can not copy the XML files {0} to {1}".format(InputFileDict[key],Output_Dir))
-		try:
-			os.system("cp {0}/CMSIT_RD53_{1}_IN.txt  {2}/test/CMSIT_RD53_{1}.txt".format(Output_Dir,key,os.environ.get("Ph2_ACF_AREA")))
-		except OSError:
-			print("Can not copy {0}/CMSIT_RD53_{1}_IN.txt to {2}/test/CMSIT_RD53.txt".format(Output_Dir,key,os.environ.get("Ph2_ACF_AREA")))
-
-
-def GenerateXMLConfig(firmwareList, testName, outputDir, **arg):
+def GenerateXMLConfig(firmwareList, testName, outputDir, **kwargs):
 	#try:
-		outputFile = outputDir + "/CMSIT_" + testName +".xml" 
+		useCROC = False
+		if testName.startswith("CROC"):
+			useCROC = True
+		
+		if useCROC:
+			outputFile = outputDir + "/CMSIT_" + testName +".toml" 
+		else:
+			outputFile = outputDir + "/CMSIT_" + testName +".xml" 
 
 		HWDescription0 = HWDescription()
 		BeBoardModule0 = BeBoardModule()
@@ -249,7 +289,10 @@ def GenerateXMLConfig(firmwareList, testName, outputDir, **arg):
 			HyBridModule0.SetHyBridName(module.getModuleName())
 			for chip in module.getChips().values():
 				FEChip = FE()
-				FEChip.SetFE(chip.getID(),chip.getLane(),"CMSIT_RD53_{0}_{1}_{2}.txt".format(module.getModuleName(),module.getModuleID(),chip.getLane()))
+				if useCROC:
+					FEChip.SetFE(chip.getID(),chip.getLane(),"CMSIT_RD53_{0}_{1}_{2}.toml".format(module.getModuleName(),module.getModuleID(),chip.getLane()))
+				else:
+					FEChip.SetFE(chip.getID(),chip.getLane(),"CMSIT_RD53_{0}_{1}_{2}.txt".format(module.getModuleName(),module.getModuleID(),chip.getLane()))
 				FEChip.ConfigureFE(FESettings_Dict[testName])
 				HyBridModule0.AddFE(FEChip)
 			HyBridModule0.ConfigureGlobal(globalSettings_Dict[testName])
@@ -264,7 +307,8 @@ def GenerateXMLConfig(firmwareList, testName, outputDir, **arg):
 		MonitoringModule0 = MonitoringModule()
 		MonitoringModule0.SetMonitoringList(MonitoringList)
 		HWDescription0.AddMonitoring(MonitoringModule0)
-		GenerateHWDescriptionXML(HWDescription0,outputFile)
+		
+		GenerateHWDescriptionXML(HWDescription0,outputFile,useCROC=useCROC)
 	#except:
 	#	logger.warning("Unexpcted issue generating {}. Please check the file".format(outputFile))
 	#	outputFile = None

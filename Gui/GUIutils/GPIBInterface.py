@@ -215,7 +215,10 @@ class PowerSupply():
 					VoltProtection = 1.3
 				if self.PowerType == "LV" and self.PoweringMode == "SLDO":
 					Voltage = defaultVoltageMap[self.PoweringMode]
-					VoltProtection = 1.85
+					VoltProtection = 1.95
+				if self.PowerType == "LV" and self.PoweringMode == "CROC":
+					Voltage = defaultVoltageMap[self.PoweringMode]
+					VoltProtection = 1.65
 				if self.PowerType == "LV":
 					logging.info("Setting LV to {}".format(Voltage))
 					#self.Instrument.write(":SOURCE:VOLTAGE:PROTECTION:LEV {0}".format(VoltProtection))
@@ -240,6 +243,9 @@ class PowerSupply():
 				if self.PowerType == "LV" and self.PoweringMode == "SLDO":
 					Voltage = 1.8
 					VoltProtection = 1.85
+				if self.PowerType == "LV" and self.PoweringMode == "CROC":
+					Voltage = 1.60
+					VoltProtection = 1.65
 				# Setting Voltage
 				cmd = "SetVoltage,PowerSupplyId:" + self.ID + ",ChannelId:Front,Value:"+ str(Voltage)
 				self.hwInterface.executeCommand(cmd)

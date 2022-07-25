@@ -29,7 +29,26 @@ def ResultGrader(inputDir, testName, runNumber, ModuleMap = {}):
 					figureList = {}
 		except Exception as err:
 			print("Failed to get the score: {}".format(repr(err)))
-			
+
+	elif testName.startswith("CROC"):
+		try:
+			CanvasList = {}
+			FileName = "{0}/results.root".format(inputDir)
+			if os.path.isfile(FileName):
+				Nodes = GetDirectory(FileName)
+				for Node in Nodes:
+					CanvasList = GetCanvasVAL_CROC(Node, CanvasList,ModuleMap)
+				Grade, PassModule, figureList = eval("Grade{}(CanvasList)".format(testName))
+				if set(Grade.keys()) != set(ExpectedModuleList):
+					logger.warning("Retrived modules from ROOT file doesn't match with folder name")
+			else:
+				for module in ExpectedModuleList:
+					Grade[module] = {0 : -1.0}
+					PassModule[module] = {0: False}
+					figureList = {}
+		except Exception as err:
+			print("Failed to get the score: {}".format(repr(err)))
+
 	else:
 		try:
 			CanvasList = {}
@@ -94,6 +113,43 @@ def GetCanvasVAL(node,canvasList,ModuleMap):
 					else:
 						canvasList[ModuleName][CanvasName] = Node.getObject()
 				canvasList = GetCanvasVAL(Node, canvasList,ModuleMap)
+			return canvasList
+	else:
+		return canvasList
+
+def GetCanvasVAL_CROC(node,canvasList,ModuleMap):
+	if node.getDaugthers() != [] and node.getClassName() == "TDirectoryFile":
+			for Node in node.getDaugthers():
+				if Node.getClassName() ==  "TCanvas":
+					CanvasName = Node.getKeyName()
+					FwName = node.getKeyName()
+					FWConfigList = FwName.split("_")
+					BeboardID = FWConfigList[1]
+					#OGID = re.sub(r'[A-Z]\(|\)','',FWConfigList[2])
+					OGID = 0
+					HyBridID = FWConfigList[3]
+					ChipID = FWConfigList[5]
+					ModulePath = "{0}_{1}_{2}".format(BeboardID,OGID,HyBridID)
+					if ModulePath in ModuleMap.keys():
+						ModuleName = ModuleMap[ModulePath]
+					else:
+						continue
+					#Module_ID_Sec = CanvasName.split("_")[2] ##To be CHECKED!!!!!
+					#if ("H" in Module_ID_Sec):
+					#	Module_ID = Module_ID_Sec.lstrip("H(").rstrip(")")
+					#elif ("M" in Module_ID_Sec):
+					#	Module_ID = Module_ID_Sec.lstrip("M(").rstrip(")")
+					#elif ("O" in Module_ID_Sec):
+					#	Module_ID = Module_ID_Sec.lstrip("O(").rstrip(")")
+					#else:
+					#	Module_ID = -1
+					#Chip_ID = CanvasName.split("_")[5].lstrip("O(").rstrip(")")
+					if ModuleName not in canvasList.keys():
+						canvasList[ModuleName] = {}
+						canvasList[ModuleName][ChipID+":"+CanvasName] = Node.getObject()
+					else:
+						canvasList[ModuleName][ChipID+":"+CanvasName] = Node.getObject()
+				canvasList = GetCanvasVAL_CROC(Node, canvasList,ModuleMap)
 			return canvasList
 	else:
 		return canvasList
@@ -613,7 +669,109 @@ def FakeGrade(canvasList):
 			passModule[Module_ID] = {0 : False}
 	return grade, passModule, figureList
 
+def GradeCROCDigitalScan(canvasList):
+	grade = {}
+	passModule = {}
+	factorPerModule = {}
+	figureList = defaultdict(lambda:[])
+	# Saving histogram for future check
+	tmpDir = os.environ.get('GUI_dir')+"/Gui/.tmp"
+	if not os.path.isdir(tmpDir)  and os.environ.get('GUI_dir'):
+		try:
+			os.mkdir(tmpDir)
+			logger.info("Creating "+tmpDir)
+		except:
+			logger.warning("Failed to create "+tmpDir)
+	if len(canvasList.keys())==0:
+		return grade, passModule, figureList
+	for key in canvasList.keys():
+		CanvasPerModule = canvasList[key]
+		factorPerModule[key] = {}
+		for CanvasName in CanvasPerModule.keys():
+			Chip_ID = CanvasName.split(":")[0]
+			if Chip_ID not in factorPerModule[key].keys():
+				factorPerModule[key][Chip_ID] = {}
+
+			PlotName = CanvasName.split(":")[1]
+			if PlotName in ["Occupancy Map","ToT Distribution","Trigger ID Distribution"]:
+				
+				outputFileName = "{}_{}".format(key,Chip_ID+"_"+re.sub(' ','_',PlotName))
+				CanvasObj = CanvasPerModule[CanvasName]
+				outputFile = TCanvas2SVG(tmpDir,CanvasObj,outputFileName)
+				figureList[key].append(outputFile)
+
+	ChipThreshold = 0.5
+	for Module_ID in factorPerModule.keys():
+		GradePerChip = {}
+		passChip = {}
+		for Chip_ID in factorPerModule[Module_ID].keys():
+			GradePerChip[Chip_ID] = 1
+			passChip[Chip_ID] = 1 > ChipThreshold 
+		if GradePerChip != {}:
+			grade[Module_ID] = GradePerChip
+			passModule[Module_ID] = passChip
+		else:
+			grade[Module_ID] = {0 : -1}
+			passModule[Module_ID] = {0 : False}
+	return grade, passModule, figureList
+
+def GradeCROCAnalogScan(canvasList):
+	return GradeCROCDigitalScan(canvasList)
+def GradeCROCRegReader(canvasList):
+	return GradeCROCDigitalScan(canvasList)
+def GradeCROCRegTest(canvasList):
+	return GradeCROCDigitalScan(canvasList)
+def GradeCROCAnalogScan(canvasList):
+	return GradeCROCDigitalScan(canvasList)
+def GradeCROCAnalogScanFast(canvasList):
+	return GradeCROCDigitalScan(canvasList)
+def GradeCROCAnalogScanSparse(canvasList):
+	return GradeCROCDigitalScan(canvasList)
+def GradeCROCThresholdScan(canvasList):
+	return GradeCROCDigitalScan(canvasList)
+def GradeCROCThresholdScanFast(canvasList):
+	return GradeCROCDigitalScan(canvasList)
+def GradeCROCThresholdScanSparse(canvasList):
+	return GradeCROCDigitalScan(canvasList)
+def GradeCROCThresholdEquilization(canvasList):
+	return GradeCROCDigitalScan(canvasList)
+def GradeCROCGlobalThresholdTuning(canvasList):
+	return GradeCROCDigitalScan(canvasList)
+def GradeCROCThresholdTuning(canvasList):
+	return GradeCROCDigitalScan(canvasList)
+def GradeCROCNoiseScan(canvasList):
+	return GradeCROCDigitalScan(canvasList)
+def GradeCROCStuckPixelScan(canvasList):
+	return GradeCROCDigitalScan(canvasList)
+def GradeCROCTimeWalkInjectionScan(canvasList):
+	return GradeCROCDigitalScan(canvasList)
+def GradeCROCTimeWalk(canvasList):
+	return GradeCROCDigitalScan(canvasList)
+def GradeCROCRingOsc(canvasList):
+	return GradeCROCDigitalScan(canvasList)
+def GradeCROCShortRingOsc(canvasList):
+	return GradeCROCDigitalScan(canvasList)
+def GradeCROCMuxScan(canvasList):
+	return GradeCROCDigitalScan(canvasList)
+def GradeCROCIVScan(canvasList):
+	return GradeCROCDigitalScan(canvasList)
+def GradeCROCADCScan(canvasList):
+	return GradeCROCDigitalScan(canvasList)
+def GradeCROCDACScan(canvasList):
+	return GradeCROCDigitalScan(canvasList)
+def GradeCROCTempSensor(canvasList):
+	return GradeCROCDigitalScan(canvasList)
+def GradeCROCShortTempSensor(canvasList):
+	return GradeCROCDigitalScan(canvasList)
+def GradeCROCVrefTrimming(canvasList):
+	return GradeCROCDigitalScan(canvasList)
+def GradeCROCCapMeasureScan(canvasList):
+	return GradeCROCDigitalScan(canvasList)
+def GradeCROCCapMeasure(canvasList):
+	return GradeCROCDigitalScan(canvasList)
+def GradeCROCBERscanTest(canvasList):
+	return GradeCROCDigitalScan(canvasList)
+
 if __name__ == "__main__":
-	ResultGrader("/Users/czkaiweb/Research/data","PixelAlive","000047")
-	ResultGrader("/Users/czkaiweb/Research/data","NoiseScan","000026")
-	ResultGrader("/Users/czkaiweb/Research/data","Physics","000026")
+	ResultGrader("/home/RD53A/data/TestResults/Test_CROCDigitalScan/Test_Module123_CROCDigitalScan_2022-07-01T15:26:45_UTC","CROCDigitalScan","000047",{})
+
