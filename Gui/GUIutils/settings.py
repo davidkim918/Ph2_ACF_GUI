@@ -247,7 +247,7 @@ for testkey in Test:
 		SingleTest.append(testkey)
 		CROCTestList.append(Test[testkey])
 
-CompositeTest = ['AllScan','QuickTest','StandardStep1','StandardStep2','StandardStep3','StandardStep4']
+CompositeTest = ['AllScan','QuickTest','StandardStep1','StandardStep2','StandardStep3','StandardStep4','CROCThresholdOptimize']
 CompositeList = {
 	'AllScan': ['NoiseScan','PixelAlive','ThresholdAdjustment',
 				'ThresholdEqualization','SCurveScan', 'NoiseScan','ThresholdAdjustment',
@@ -258,7 +258,8 @@ CompositeList = {
 	'StandardStep3': ['SCurveScan','GainScan','GainOptimization'],
 	'StandardStep4': ['InjectionDelay'],
 	'StandardStep5': ['SCurveScan'],
-	'QuickTest': ['IVCurve','NoiseScan','PixelAlive']
+	'QuickTest': ['IVCurve','NoiseScan','PixelAlive'],
+	'CROCThresholdOptimize' : ['CROCThresholdTuning','CROCThresholdScan']
 }
 firstTimeList = ['AllScan', 'StandardStep1', 'PixelAlive']
 

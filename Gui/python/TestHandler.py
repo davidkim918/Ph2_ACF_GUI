@@ -121,6 +121,7 @@ class TestHandler(QObject):
 		self.updateValidation.connect(self.runwindow.updateValidation)
 
 		self.initializeRD53Dict()
+		self.FWisLoaded = 'False'
 
 	def  initializeRD53Dict(self):
 		self.rd53_file = {}
@@ -137,6 +138,7 @@ class TestHandler(QObject):
 			self.ModuleMap[fwPath] = moduleName
 
 	def configTest(self):
+		# The run number is just given by the first line in RunNumber.txt
 		try:
 			RunNumberFileName = os.environ.get('Ph2_ACF_AREA')+"/test/RunNumber.txt"
 			if os.path.isfile(RunNumberFileName):
@@ -159,16 +161,17 @@ class TestHandler(QObject):
 		else:
 			testName = self.currentTest
 
-		ModuleIDs = []
+		self.ModuleIDs = []
 		for module in self.firmware.getAllModules().values():
-			#ModuleIDs.append(str(module.getModuleID()))
-			ModuleIDs.append(str(module.getModuleName()))
+			#self.ModuleIDs.append(str(module.getModuleID()))
+			self.ModuleIDs.append(str(module.getModuleName()))
 			
-		self.output_dir, self.input_dir = ConfigureTest(testName, "_Module".join(ModuleIDs), self.output_dir, self.input_dir, self.connection)
+		self.output_dir, self.input_dir = ConfigureTest(testName, "_Module".join(self.ModuleIDs), self.output_dir, self.input_dir, self.connection)
 
 		for key in self.rd53_file.keys():
 			if self.rd53_file[key] == None:
 				if self.useCROC:
+					# Changed from just RD53B.toml
 					self.rd53_file[key] = os.environ.get('Ph2_ACF_AREA')+"/settings/RD53B.toml"
 				else:
 					self.rd53_file[key] = os.environ.get('Ph2_ACF_AREA')+"/settings/RD53Files/CMSIT_RD53.txt"
@@ -223,14 +226,29 @@ class TestHandler(QObject):
 		return
 
 	def saveConfigs(self):
+		if self.currentTest == "" and isCompositeTest(self.info[1]):
+			testName = CompositeList[self.info[1]][0]
+		elif self.currentTest ==  None:
+			testName = self.info[1]
+		else:
+			testName = self.currentTest
+
 		if self.useCROC:
 			for key in self.rd53_file.keys():
 				try:
-					os.system("cp {0}/test/RD53B.toml {2}/RD53B_{3}_{4}_{5}.toml".format(os.environ.get("Ph2_ACF_AREA"), key, self.output_dir, self.info[1],key.split("_")[1],self.RunNumber) )
+					os.system("cp {0}/test/CMSIT_RD53_{2}.toml {1}/CMSIT_RD53_{2}_OUT.toml".format(os.environ.get("Ph2_ACF_AREA"), self.output_dir,key ) )
 			#	try:
 			#		os.system("cp {0}/test/CMSIT_RD53_{1}.toml {2}/CMSIT_RD53_{1}_OUT.toml".format(os.environ.get("Ph2_ACF_AREA"),key,self.output_dir))
 				except:
-					print("Failed to copy {0}/test/CMSIT_RD53_{1}.toml {2}/CMSIT_RD53_{1}_OUT.toml".format(os.environ.get("Ph2_ACF_AREA"),key,self.output_dir))
+					#print("Failed to copy {0}/test/CMSIT_RD53_{1}.toml {2}/CMSIT_RD53_{1}_OUT.toml".format(os.environ.get("Ph2_ACF_AREA"),key,self.output_dir))
+					print("Failed to copy {0}/test/CMSIT_RD53_{2}.toml {1}/CMSIT_RD53_{2}_OUT.toml".format(os.environ.get("Ph2_ACF_AREA"), self.output_dir,key ))
+				try:
+					os.system("cp {0}/test/tdac_{2}.csv {1}/tdac_{2}_OUT.csv".format(os.environ.get("Ph2_ACF_AREA"), self.output_dir,key ) )
+			#	try:
+			#		os.system("cp {0}/test/tdac_{1}.csv {2}/tdac_{1}_OUT.csv".format(os.environ.get("Ph2_ACF_AREA"),key,self.output_dir))
+				except:
+					#print("Failed to copy {0}/test/tdac_{1}.csv {2}/tdac_{1}_OUT.csv".format(os.environ.get("Ph2_ACF_AREA"),key,self.output_dir))
+					print("Failed to copy {0}/test/tdac_{2}.csv {1}/tdac_{2}_OUT.csv".format(os.environ.get("Ph2_ACF_AREA"), self.output_dir,key ))			
 		else:
 			for key in self.rd53_file.keys():
 				try:
@@ -330,24 +348,25 @@ class TestHandler(QObject):
 		print('firmware to be used is {}'.format(self.firmwareImage))
 		#self.fw_process.start("echo", ["fpgaconfig","-c","CMSIT.xml", "-i", "{}".format(self.firmwareImage)])
 		#-----Loading correct firmware for the given module type---------#
-		"""if "RD53B" in self.ModuleType:
-			self.fw_process.start("fpgaconfig",["-c","CROC.xml","-i", "{}".format(self.firmwareImage)])
-			self.fw_process.waitForFinished()
-			self.fw_process.start("RD53BminiDAQ",["-f","CROC.xml","-r"])
-			self.fw_process.waitForFinished()	
-		else:
-			self.fw_process.start("fpgaconfig",["-c","CMSIT.xml","-i", "{}".format(self.firmwareImage)])
-			self.fw_process.waitForFinished()
-			self.fw_process.start("CMSITminiDAQ",["-f","CMSIT.xml","-r"])
-			self.fw_process.waitForFinished()"""
+		if not self.FWisLoaded:
+			if "RD53B" in self.ModuleType:
+				self.fw_process.start("fpgaconfig",["-c","CROC.xml","-i", "{}".format(self.firmwareImage)])
+				self.fw_process.waitForFinished()
+				self.fw_process.start("RD53BminiDAQ",["-f","CROC.xml","-r"])
+				self.fw_process.waitForFinished()
+				self.FWisLoaded = 'True'
+			else:
+				self.fw_process.start("fpgaconfig",["-c","CMSIT.xml","-i", "{}".format(self.firmwareImage)])
+				self.fw_process.waitForFinished()
+				self.fw_process.start("CMSITminiDAQ",["-f","CMSIT.xml","-r"])
+				self.fw_process.waitForFinished()
+				self.FWisLoaded = 'True'
 		#-----------------------------------------------------------------#
 
 		if Test[self.currentTest] in ["pixelalive","noise","latency","injdelay","clockdelay","threqu","thrmin","scurve","gainopt","thradj","physics","gain"]:
 			self.run_process.start("CMSITminiDAQ", ["-f","CMSIT.xml", "-c", "{}".format(Test[self.currentTest])])
-		elif Test[self.currentTest] in ["DigitalScan","ThresholdTuning","ThresholdScanFast"]:
-			self.run_process.start("RD53BminiDAQ", ["-h", "-f", "CROC.xml", "-t", "RD53BTools.toml", "{}".format(Test[self.currentTest])])
 		elif self.useCROC:
-			self.run_process.start("RD53BminiDAQ", ["-h", "-f", "CROC.xml", "-t", "RD53BTools.toml", "{}".format(Test[self.currentTest])])
+			self.run_process.start("RD53BminiDAQ", ["-hs", "-f", "CROC.xml", "-t", "RD53BTools.toml", "{}".format(Test[self.currentTest])])
 		else:
 			self.info_process.start("echo",["test {} not runnable, quitting...".format(Test[self.currentTest])])
 	
@@ -422,7 +441,7 @@ class TestHandler(QObject):
 				os.system("cp {0}/test/Results/*/*.root {1}/".format(os.environ.get("Ph2_ACF_AREA"),self.output_dir))
 				os.system("rm -rf {0}/test/Results/* ".format(os.environ.get("Ph2_ACF_AREA")))
 			except:
-				print("Failde to copy ROOT file to output directory")
+				print("Failed to copy ROOT file to output directory")
 		
 		else:
 			try:
@@ -675,7 +694,25 @@ class TestHandler(QObject):
 				return (False, None, 0)
 		else:
 			return (False, None, 0)
+	def saveOutput(self):
+		if self.currentTest == "" and isCompositeTest(self.info[1]):
+			testName = CompositeList[self.info[1]][0]
+		elif self.currentTest ==  None:
+			testName = self.info[1]
+		else:
+			testName = self.currentTest
+
+		if self.useCROC:
+			for key in self.rd53_file.keys():
+				try:
+					os.system("cp {0}/test/{2}.csv {1}/{2}_OUT.csv".format(os.environ.get("Ph2_ACF_AREA"), self.output_dir, testName, "_Module".join(self.ModuleIDs), self.runNumber ) )
+			#	try:
+			#		os.system("cp {0}/test/CMSIT_RD53_{1}.toml {2}/CMSIT_RD53_{1}_OUT.toml".format(os.environ.get("Ph2_ACF_AREA"),key,self.output_dir))
+				except:
+					#print("Failed to copy {0}/test/CMSIT_RD53_{1}.toml {2}/CMSIT_RD53_{1}_OUT.toml".format(os.environ.get("Ph2_ACF_AREA"),key,self.output_dir))
+					print("Failed to copy {0}/test/RD53B.toml to {1}/RD53B_{2}_{3}_{4}".format(os.environ.get("Ph2_ACF_AREA"), self.output_dir, testName, "_Module".join(self.ModuleIDs), self.runNumber ))
 		
+
 	@QtCore.pyqtSlot()
 	def on_readyReadStandardOutput_info(self):
 		if os.path.exists(self.outputFile):
@@ -709,7 +746,7 @@ class TestHandler(QObject):
 
 		self.testIndexTracker += 1
 		self.saveConfigs()
-
+		#self.saveOutput() # Ryan Added this
 		EnableReRun = False
 		if isCompositeTest(self.info[1]):
 			if self.testIndexTracker == len(CompositeList[self.info[1]]):

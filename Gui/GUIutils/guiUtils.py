@@ -145,8 +145,11 @@ def SetupXMLConfigfromFile(InputFile, Output_Dir, firmwareName, RD53Dict, useCRO
 			except:
 				ChipKey = "{}_{}".format(ParentNode.attrib["Id"],Node.attrib["Id"])
 			if ChipKey in RD53Dict.keys():
-				Node.set('configfile','CMSIT_RD53_{}.txt'.format(ChipKey))
-				changeMade = True
+				if not useCROC:
+					Node.set('configfile','CMSIT_RD53_{}.txt'.format(ChipKey))
+					changeMade = True
+				else:
+					Node.set('configfile','CMSIT_RD53_{}.toml'.format(ChipKey))
 			else:
 				try:
 					keyList = list(RD53Dict.keys())
@@ -235,6 +238,14 @@ def SetupRD53Config(Input_Dir, Output_Dir, RD53Dict, useCROC = False):
 				os.system("cp {0}/CMSIT_RD53_{1}_IN.toml  {2}/test/CMSIT_RD53_{1}.toml".format(Output_Dir,key,os.environ.get("Ph2_ACF_AREA")))
 			except OSError:
 				print("Can not copy {0}/CMSIT_RD53_{1}_IN.toml to {2}/test/CMSIT_RD53_{1}.toml".format(Output_Dir,key,os.environ.get("Ph2_ACF_AREA")))
+			try:
+				os.system("cp {0}/tdac_{1}_OUT.csv {2}/tdac_{1}_IN.csv".format(Input_Dir,key,Output_Dir))
+			except OSError:
+				print("Can not copy the TDAC configuration files to {0} for RD53 ID: {1}".format(Output_Dir, key))
+			try:
+				os.system("cp {0}/tdac_{1}_IN.csv  {2}/test/tdac_{1}.csv".format(Output_Dir,key,os.environ.get("Ph2_ACF_AREA")))
+			except OSError:
+				print("Can not copy {0}/tdac_{1}_IN.csv to {2}/test/tdac_{1}.csv".format(Output_Dir,key,os.environ.get("Ph2_ACF_AREA")))
 
 
 ##########################################################################
@@ -261,9 +272,13 @@ def SetupRD53ConfigfromFile(InputFileDict, Output_Dir, useCROC = False):
 				os.system("cp {0}/CMSIT_RD53_{1}_IN.toml  {2}/test/CMSIT_RD53_{1}.toml".format(Output_Dir,key,os.environ.get("Ph2_ACF_AREA")))
 			except OSError:
 				print("Can not copy {0}/CMSIT_RD53_{1}_IN.toml to {2}/test/CMSIT_RD53.toml".format(Output_Dir,key,os.environ.get("Ph2_ACF_AREA")))
+			try:
+				os.system("sed -i 's/tdac\.csv'/tdac_{1}\.csv/g {2}/test/CMSIT_RD53_{1}.toml".format(Output_Dir,key,os.environ.get("Ph2_ACF_AREA")))
+			except OSError:
+				print("Was not able to add tdac file to chip toml file")
 
 def GenerateXMLConfig(firmwareList, testName, outputDir, **kwargs):
-	#try:
+	try:
 		useCROC = False
 		if testName.startswith("CROC"):
 			useCROC = True
@@ -290,7 +305,7 @@ def GenerateXMLConfig(firmwareList, testName, outputDir, **kwargs):
 			for chip in module.getChips().values():
 				FEChip = FE()
 				if useCROC:
-					FEChip.SetFE(chip.getID(),chip.getLane(),"CMSIT_RD53_{0}_{1}_{2}.toml".format(module.getModuleName(),module.getModuleID(),chip.getLane()))
+					FEChip.SetFE(chip.getID(),chip.getLane(),"CMSIT_RD53_{0}_{1}_{2}.toml".format(module.getModuleName(),module.getModuleID(),chip.getID()))
 				else:
 					FEChip.SetFE(chip.getID(),chip.getLane(),"CMSIT_RD53_{0}_{1}_{2}.txt".format(module.getModuleName(),module.getModuleID(),chip.getLane()))
 				FEChip.ConfigureFE(FESettings_Dict[testName])
@@ -309,11 +324,11 @@ def GenerateXMLConfig(firmwareList, testName, outputDir, **kwargs):
 		HWDescription0.AddMonitoring(MonitoringModule0)
 		
 		GenerateHWDescriptionXML(HWDescription0,outputFile,useCROC=useCROC)
-	#except:
-	#	logger.warning("Unexpcted issue generating {}. Please check the file".format(outputFile))
-	#	outputFile = None
+	except:
+		logger.warning("Unexpcted issue generating {}. Please check the file".format(outputFile))
+		outputFile = None
 
-		return outputFile
+	return outputFile
 
 ##########################################################################
 ##  Functions for setting up XML and RD53 configuration (END)

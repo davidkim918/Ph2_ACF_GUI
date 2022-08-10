@@ -252,7 +252,7 @@ def GenerateHWDescriptionXML(HWDescription,outputFile = "CMSIT_gen.xml", useCROC
         Node_HyBrid = ET.SubElement(Node_OGModule, 'Hybrid')
         Node_HyBrid = SetNodeAttribute(Node_HyBrid,{'Id':HyBridModule.Id,'Status':HyBridModule.Status,'Name':HyBridModule.Name})
         Node_FEPath = ET.SubElement(Node_HyBrid, HyBridModule.HyBridType+'_Files')
-        Node_FEPath = SetNodeAttribute(Node_FEPath,{'file':HyBridModule.File_Path})
+        Node_FEPath = SetNodeAttribute(Node_FEPath,{'path':HyBridModule.File_Path})
         FEList = HyBridModule.FEList
         for FE in FEList:
           Node_FE = ET.SubElement(Node_HyBrid, "CROC" if useCROC else BeBoard.boardType)

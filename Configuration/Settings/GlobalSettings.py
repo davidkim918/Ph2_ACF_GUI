@@ -79,6 +79,7 @@ globalSettings_CROC = {
 'VCAL_MED'               :   "300",
 }
 
+
 globalSettings_Dict = {
     'Latency'                    :    globalSettings,
     'PixelAlive'                 :    globalSettings,
