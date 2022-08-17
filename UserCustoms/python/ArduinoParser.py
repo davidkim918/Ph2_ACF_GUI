@@ -12,11 +12,13 @@ def ArduinoParser(text):
 #################Arduino formatting for OSU###############
 ProbeMapOSU = {
     'DHT11': "Humidity",
+    'vol2temp': "Temperature(CROC Temperature)",
     'MAX31850': "Temperature(single wire)",
     'MAX31865': "Temperature(triple wire)"
 }
 ThresholdMapOSU = {
     'DHT11': [0,60],
+    'vol2temp': [-30,50],
     'MAX31850': [-20,50],
     'MAX31865': [-20,23],
 }
@@ -38,7 +40,7 @@ def ArduinoParserCustomOSU(text):
             else:
                 if probeValue < ThresholdMapOSU[probeName][0] or  probeValue > ThresholdMapOSU[probeName][1]:
                     colorCode = "#FF0000"
-                    if probeName in ['MAX31850','MAX31865']:
+                    if probeName in ['vol2temp','MAX31850','MAX31865']:
                         StopSignal = True
                         
                 else:

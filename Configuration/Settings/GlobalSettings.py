@@ -1,3 +1,5 @@
+import os
+
 globalSettings = {
 'EN_CORE_COL_SYNC'       :     "0",
 'EN_CORE_COL_LIN_1'      : "65535",
@@ -79,6 +81,26 @@ globalSettings_CROC = {
 'VCAL_MED'               :   "300",
 }
 
+tuneablevalues = []
+tuneablevalues.append('DAC_GDAC_R_LIN')
+tuneablevalues.append('DAC_GDAC_L_LIN')
+tuneablevalues.append('DAC_GDAC_M_LIN')
+tuneablevalues.append('DAC_LDAC_LIN')
+tuneablevalues.append('DAC_KRUM_CURR_LIN')
+
+
+###-------This block of code opens the RD53B.toml file that's in the test directory and grabs any tuneable-----###
+###-------values that would result from tests such as ThresholdTuning and GainTuning.  Those tests save the ---###
+###-------optimal values in $Ph2_ACF_AREA/test/RD53B.toml.  This file gets overwritten with each test----------###
+tomlFile = open("{0}/test/RD53B.toml".format(os.environ.get("Ph2_ACF_AREA")),"r")
+for line in tomlFile:
+	for tuneablevalue in tuneablevalues:	
+		if tuneablevalue in line:
+			reg = line.split('=')[0]
+			reg = reg.strip()
+			newvalue = line.split('=')[1]
+			newvalue = newvalue.strip('\n').strip()
+			globalSettings_CROC[reg] = newvalue
 
 globalSettings_Dict = {
     'Latency'                    :    globalSettings,
