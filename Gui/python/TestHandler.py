@@ -123,7 +123,7 @@ class TestHandler(QObject):
 
 		self.initializeRD53Dict()
 		
-
+	# Sets up a dictionary to map each chip to an RD53 txt file.  This sets the keys of the dict as a module-specific identifier, but doesn't make the txt files yet.
 	def  initializeRD53Dict(self):
 		self.rd53_file = {}
 		beboardId = 0
@@ -164,9 +164,8 @@ class TestHandler(QObject):
 			ModuleIDs.append(str(module.getModuleName()))
 		# output_dir gets set to $DATA_dir/Test_{testname}/Test_Module{ModuleID}_{Test}_{TimeStamp}
 		self.output_dir, self.input_dir = ConfigureTest(testName, "_Module".join(ModuleIDs), self.output_dir, self.input_dir, self.connection)
-
-		# The default place to get the config file is in /settings/RD53Files/CMSIT_RD53.txt
-		# FIXME Fix rd53_file[key] so that it reads the correct txt file depending on what module is connected. -> Done!
+		print('The input directory for this test is set to {0}'.format(self.input_dir))
+		# The default place to get the config file is in /settings/RD53Files/CMSIT_RD53.txt.  This gets that default txt file and assigns it to a chip in the rd53_file dictionary.
 		for key in self.rd53_file.keys():
 			if self.rd53_file[key] == None:
 				self.rd53_file[key] = os.environ.get('Ph2_ACF_AREA')+"/settings/RD53Files/CMSIT_{0}.txt".format(BoardtypeMap[os.environ.get('Ph2_ACF_VERSION')])
@@ -705,7 +704,7 @@ class TestHandler(QObject):
 
 		# manually validate the result
 
-		#print(self.figurelist)
+		print(self.figurelist)
 
 		notAccept = False
 		if status == False:
@@ -806,7 +805,7 @@ class TestHandler(QObject):
 		pass
 
 	def forceContinue(self):
-		reply = QMessageBox.question(self, 'Abort following tests', 'Failed component detected, continue to following test?',
+		reply = QMessageBox.question(None, 'Abort following tests', 'Failed component detected, continue to following test?',
 				QMessageBox.No | QMessageBox.Yes, QMessageBox.No)
 
 		if reply == QMessageBox.Yes:

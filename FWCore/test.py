@@ -1,4 +1,4 @@
-import FWCore.DAQ as DAQ
+'''import FWCore.DAQ as DAQ
 #from   Configuration.Config.SingleSCC import *
 
 myDAQ = DAQ.DAQ("myDAQ")
@@ -27,6 +27,6 @@ myDAQ.step3 = DAQ.Step("Test3",
 
 myDAQ.Procedure = DAQ.Process(myDAQ.step1,myDAQ.step2,myDAQ.step3)
 
-myDAQ.ShowProcedure()
+myDAQ.ShowProcedure()'''
 
 

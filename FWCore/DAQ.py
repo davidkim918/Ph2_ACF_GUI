@@ -1,3 +1,4 @@
+'''
 import importlib
 import sys
 import subprocess
@@ -47,5 +48,5 @@ def SetConfiguration(name,path):
 def ConfigureBoard(BoardDescription, outputFile):
   GenerateHWDescriptionXML(BoardDescription,outputFile)
   return outputFile
-    
+    '''
   

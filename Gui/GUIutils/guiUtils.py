@@ -221,7 +221,7 @@ def SetupRD53Config(Input_Dir, Output_Dir, RD53Dict):
 
 ##########################################################################
 ##########################################################################
-
+# Copies CMSIT_RD53.txt file to test directory and output directory with new, moduleID and chip-specific names
 def SetupRD53ConfigfromFile(InputFileDict, Output_Dir):
 	for key in InputFileDict.keys():
 		try:

@@ -1,4 +1,4 @@
-from Configuration.XMLUtil import *
+'''from Configuration.XMLUtil import *
 from Configuration.Settings.GlobalSettings import *
 from Configuration.Settings.FESettings import *
 from Configuration.Settings.HWSettings import *
@@ -21,4 +21,4 @@ BeBoardModule0.SetRegisterValue(RegisterSettings)
 # Config HWDescription
 HWDescription = HWDescription()
 HWDescription.AddBeBoard(BeBoardModule0)
-HWDescription.AddSettings(HWSettings)
+HWDescription.AddSettings(HWSettings)'''
