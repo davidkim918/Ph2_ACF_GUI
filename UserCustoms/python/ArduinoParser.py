@@ -11,24 +11,25 @@ def ArduinoParser(text):
 
 #################Arduino formatting for OSU###############
 ProbeMapOSU = {
-    'DHT11': "Humidity",
-    'MAX31850': "Temperature(single wire)",
-    'MAX31865': "Temperature(triple wire)"
+    'DHT22_temperature': "Temperature",
+    'DHT22_humidity'   : "Humidity",
 }
 ThresholdMapOSU = {
-    'DHT11': [0,60],
-    'MAX31850': [-20,50],
-    'MAX31865': [-20,23]
+    'DHT22_temperature': [-20,50],
+    'DHT22_humidity'   : [0,60],
 }
+
+##-----This section needs some work---------------------
 def ArduinoParserCustomOSU(text):
     StopSignal = False
-    values = re.split(" |\t",text)[1:]
+    values = re.split(",",text)[1:]
+#    values = re.split(" |\t",text)[1:]
     readValue = {}
     ProbeReads = []
 
     for index,value in enumerate(values):
         value = value.rstrip(":")
-        if value in ProbeMapOSU.keys() and 'Temperature' not in values[index-1]:
+        if value in ProbeMapOSU.keys():
             readValue[value] = float(values[index+1])
 
     for probeName,probeValue in readValue.items():
@@ -49,5 +50,5 @@ def ArduinoParserCustomOSU(text):
             ProbeReads.append('{0}:{1}'.format(ProbeMapOSU[probeName],probeValue))
     ProbeReadsText = '\t'.join(ProbeReads)
     return StopSignal,ProbeReadsText
-
+##--------------------------------------------------------
     
