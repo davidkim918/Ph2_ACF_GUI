@@ -117,7 +117,7 @@ LVPowerSupplyModel = {
 }
 
 PowerSupplyModel_Termination = {
-	"Keithley 2410 (RS232)"    :  '\r',
+	"Keithley 2410 (RS232)"    :  '\r\n',
 	"KeySight E3633 (RS232)"   :  '\r\n',
 }
 

@@ -63,7 +63,7 @@ class PowerSupply():
 
 	def setCompCurrent(self, compcurrent = 1.05):
 		self.CompCurrent = compcurrent
-	
+
 	def setResourceManager(self):
 		self.ResourcesManager = visa.ResourceManager('@py')
 
@@ -129,6 +129,7 @@ class PowerSupply():
 				if resourceName in self.deviceMap.keys():
 					self.Instrument = self.ResourcesManager.open_resource("{}".format(resourceName))
 					self.Port = self.deviceMap[resourceName].lstrip("ASRL").rstrip("::INSTR")
+					self.Instrument.baud_rate = 19200
 				elif resourceName in self.deviceMap.values():
 					self.Instrument = self.ResourcesManager.open_resource("{}".format(resourceName))
 				else:

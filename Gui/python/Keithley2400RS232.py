@@ -9,8 +9,8 @@ def InitialDevice(device):
 		logger.error("Error occured while restore defaults: {}".format(err))
 	# Select voltage source mode
 	try:
-		device.write(":SOURCE:FUCNCTION VOLT")
-		device.write(":SOURCE:VOLTAGE:MODE FIX")
+		device.write(":SOURCE:FUNCTION VOLTAGE")
+		device.write(":SOURCE:VOLTAGE:MODE FIXED")
 	except Exception as err:
 		logger.error("Error occured while setting voltage source mode: {}".format(err))
 
@@ -30,7 +30,7 @@ def TurnOn(device):
 
 def TurnOff(device):
 	try:
-		device.write(":SOURCE:VOLTAGE:LEV 0")
+		device.write(":SOURCE:VOLTAGE:LEVEL 0")
 		device.write(":OUTPUT OFF")
 	except  Exception as err:
 		logger.error("Error occured while turning off the device: {}".format(err))
