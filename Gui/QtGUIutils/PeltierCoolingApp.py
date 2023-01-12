@@ -19,10 +19,12 @@ import os
 class Peltier(QWidget):
     def __init__(self, dimension):
         super(Peltier, self).__init__()
+        self.peltierInUse = False
         self.pool = QThreadPool.globalInstance()
         self.Ph2ACFDirectory = os.getenv("GUI_dir")
         self.setupUi()
         self.show()
+        
 
     def setupUi(self):
         # MainWindow.setObjectName("MainWindow")
@@ -98,6 +100,7 @@ class Peltier(QWidget):
         self.powerButton.setEnabled(True)
         self.polarityButton.setEnabled(True)
         self.setTempButton.setEnabled(True)
+        self.peltierInUse = True
 
 
     def setPowerStatus(self, power):

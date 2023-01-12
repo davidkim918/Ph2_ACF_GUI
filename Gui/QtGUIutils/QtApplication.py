@@ -39,6 +39,7 @@ class QtApplication(QWidget):
 		self.ProcessingTest = False
 		self.expertMode = False
 		self.FwUnderUsed = ''
+		
 
 		# self.FwUnderUsed = []
 
@@ -1133,10 +1134,11 @@ class QtApplication(QWidget):
 			self.LVpowersupply.TurnOff()
 
 			# If you didn't start the Peltier controller, tempPower won't be defined
-			try:
-				self.PeltierCooling.shutdown()
-			except AttributeError:
-				pass
+			if self.PeltierCooling.peltierInUse == True:
+				try:
+					self.PeltierCooling.shutdown()
+				except AttributeError:
+					pass
 
 			os.system("rm -r {}/Gui/.tmp/*".format(os.environ.get("GUI_dir")))
 			event.accept()

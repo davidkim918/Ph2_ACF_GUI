@@ -66,6 +66,8 @@ class TestHandler(QObject):
 		self.firmwareName = self.firmware.getBoardName()
 		self.ModuleMap = dict()
 		self.ModuleType = self.firmware.getModuleByIndex(0).getModuleType()
+		self.ModuleFlavor = module_flavor[self.ModuleType]
+		print('This is a {0} module'.format(self.ModuleFlavor))
 		self.Ph2_ACF_ver = os.environ.get('Ph2_ACF_VERSION')
 		print('Using version {0} of Ph2_ACF'.format(self.Ph2_ACF_ver))
 		self.firmwareImage = firmware_image[self.ModuleType][self.Ph2_ACF_ver]
@@ -78,7 +80,7 @@ class TestHandler(QObject):
 		self.ProgressBarList = []
 		self.input_dir = ""
 		self.output_dir = ''
-		self.config_file = '' #os.environ.get('GUI_dir')+ConfigFiles.get(self.calibration, "None")
+		self.config_file = os.environ.get('Ph2_ACF_AREA') + '/settings/CMSIT_{0}.xml'.format(self.ModuleFlavor) #os.environ.get('GUI_dir')+ConfigFiles.get(self.calibration, "None")
 		self.rd53_file  = {}
 		self.grade = -1
 		self.currentTest = ""

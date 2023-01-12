@@ -82,13 +82,20 @@ ModuleType = {
 	4	:	"TBPX Quad",
 	5   : 	"Yellow Module (Purdue)"
 }
+module_flavor = {
+	"SingleSCC" : "RD53A",
+	"Yellow Module (Purdue)" : "RD53A",
+	"TFPX Quad" : "RD53A",
+	"TEPX Quad" : "RD53A",
+	"TBPX Quad" : "RD53A",
+}
 
 firmware_image = {
-	"SingleSCC" : {"v4-06":"SCC_ELE_RD53A_v4-5.bit","v4-02":"SCC_ELE_RD53A_v4-2.bit"},
-	"Yellow Module (Purdue)" : {"v4-06":"QUAD_ELE_RD53A_v4-5.bit","v4-02":"QUAD_ELE_RD53A_v4-2.bit"},
-	"TFPX Quad" : {"v4-06":"QUAD_ELE_RD53A_v4-5.bit","v4-02":"QUAD_ELE_RD53A_v4-2.bit"},
-	"TEPX Quad" : {"v4-06":"QUAD_ELE_RD53A_v4-5.bit","v4-02":"QUAD_ELE_RD53A_v4-2.bit"},
-	"TBPX Quad" : {"v4-06":"QUAD_ELE_RD53A_v4-5.bit","v4-02":"QUAD_ELE_RD53A_v4-2.bit"},
+	"SingleSCC" : {"v4-08":"SCC_ELE_RD53A_v4-5.bit","v4-06":"SCC_ELE_RD53A_v4-5.bit","v4-02":"SCC_ELE_RD53A_v4-2.bit"},
+	"Yellow Module (Purdue)" : {"v4-08":"QUAD_ELE_RD53A_v4-5.bit","v4-06":"QUAD_ELE_RD53A_v4-5.bit","v4-02":"QUAD_ELE_RD53A_v4-2.bit"},
+	"TFPX Quad" : {"v4-08":"QUAD_ELE_RD53A_v4-5.bit","v4-06":"QUAD_ELE_RD53A_v4-5.bit","v4-02":"QUAD_ELE_RD53A_v4-2.bit"},
+	"TEPX Quad" : {"v4-08":"QUAD_ELE_RD53A_v4-5.bit","v4-06":"QUAD_ELE_RD53A_v4-5.bit","v4-02":"QUAD_ELE_RD53A_v4-2.bit"},
+	"TBPX Quad" : {"v4-08":"QUAD_ELE_RD53A_v4-5.bit","v4-06":"QUAD_ELE_RD53A_v4-5.bit","v4-02":"QUAD_ELE_RD53A_v4-2.bit"},
 #	"RD53B" : {"v4.0.6":"IT_L12K4SCC_ELE_CROC.bit"}
 }
 
@@ -217,6 +224,7 @@ updatedXMLValues = defaultdict(dict)
 header = ['Source', 'Module_ID', 'User', 'Test', 'Time', 'Grade', 'DQMFile'] #Stop using
 
 BoardtypeMap = {
+	'v4-08': 'RD53A',
 	'v4-06': 'RD53A',
 	'v4-02': 'RD53'
 }
