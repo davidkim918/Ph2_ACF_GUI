@@ -11,4 +11,4 @@ for port in "${ports[@]}"; do
 done
 devices=$(echo $devices | xargs)
 
-docker run --rm -ti -v $PWD:$PWD --device=/dev/ttyUSBLV --device=/dev/ttyUSBHV -w $PWD  -e DISPLAY=$DISPLAY -v $XSOCK:$XSOCK -v $XAUTH:$XAUTH   -e XAUTHORITY=$XAUTH --net host  local/testimage
+docker run --rm -ti -v $PWD:$PWD -v ${PWD}/Ph2_ACF/test/Results:${PWD}/Ph2_ACF/test/Results -v ${PWD}/data:${PWD}/data --device=/dev/ttyUSBLV --device=/dev/ttyUSBHV --device=/dev/ttyUSBPeltier --device=/dev/ttyACM0 -w $PWD  -e DISPLAY=$DISPLAY -v $XSOCK:$XSOCK -v $XAUTH:$XAUTH   -e XAUTHORITY=$XAUTH --net host  local/testimage
