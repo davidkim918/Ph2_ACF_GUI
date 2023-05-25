@@ -291,6 +291,9 @@ class QtApplication(QWidget):
 			print("Unexpected content detected ")
 
 		try:
+			#check this section, dont worry about the database.
+			#self.createSimplifiedMain()
+			
 			if self.TryUsername == '':
 				msg.information(None,"Error","Please enter a valid username", QMessageBox.Ok)
 				return
@@ -315,6 +318,8 @@ class QtApplication(QWidget):
 				else:
 					self.createSimplifiedMain()
 				#self.checkFirmware()
+			
+			
 
 		except Exception as err:
 			print("Failed to connect the database: {}".format(repr(err)))
@@ -1137,6 +1142,8 @@ class QtApplication(QWidget):
 			print('Application terminated')
 			self.HVpowersupply.TurnOffHV()
 			self.LVpowersupply.TurnOff()
+			#turn off the peltierController in simplified gui
+			self.SimpleMain.shutdown()
 
 			# If you didn't start the Peltier controller, tempPower won't be defined
 			try:

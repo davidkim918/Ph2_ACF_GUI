@@ -96,8 +96,8 @@ class SimplifiedMainWidget(QWidget):
 			self.timer = QTimer()
 			self.timer.timeout.connect(self.controllerMonitoring)
 			#self.tempReading.connect(lambda temp: self.currentTempDisplay.display(temp))   #we need to read it but not to display the color
-			self.power = 1 #debug
-			self.powerReading.connect(lambda power: self.setPowerStatus(power)) #debug by adding an intial value power=0
+			self.power = 1 
+			self.powerReading.connect(lambda power: self.setPowerStatus(power)) 
 			self.timer.start(500) # Perform monitoring functions every 500ms
 
 
@@ -208,8 +208,7 @@ class SimplifiedMainWidget(QWidget):
 			value[-(i+1)] = temp[-(i+1)]
 		return value
 
-		# Shutdown the peltier if it is on and stop threads that are running
-		# Currently not implemented
+
 	def shutdown(self):
 		try:
 			self.pelt.sendCommand(self.pelt.createCommand('Power On/Off Write', ['0','0','0','0','0','0','0','0']))
@@ -456,7 +455,6 @@ class SimplifiedMainWidget(QWidget):
 		self.PeltierMonitorValue = QLabel()
 		#self.PeltierMonitorValue.setText("Peltier Value")
 		self.PeltierMonitorLabel.setText("Peltier Cooling")
-		#self.powerStatusValue == 1 #debug
 		if int(self.powerStatusValue) == 1:
 			self.PeltierMonitorValue.setPixmap(self.greenledpixmap)
 		else:
