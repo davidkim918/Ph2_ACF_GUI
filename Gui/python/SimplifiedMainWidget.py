@@ -4,6 +4,8 @@
 
 #5- 24: ryan we probabaly dont need the read temp and print it. Instead we to read the data at the background and kill the program if it exceed certain value
 # moving the setup up at top of __init__ it start to send message but powerstatusvalue issue is still exist
+
+#5-25 fix LED, add quit signal that do the power toggle(closeEvent() in SimplifiedMain()) when quit
 from PyQt5 import QtCore
 from PyQt5 import QtSerialPort
 from PyQt5.QtCore import *
@@ -480,7 +482,7 @@ class SimplifiedMainWidget(QWidget):
 		self.StatusLayout.addWidget(self.ArduinoMonitorValue,2,2,1,1)
 		#self.StatusLayout.addWidget(self.ArduinoGroup.ArduinoMeasureValue)
 		self.StatusLayout.addWidget(self.PeltierMonitorLabel, 2, 3, 1, 1)
-		#self.StatusLayout.addWidget(self.PeltierMonitorValue, 2, 4, 1, 1)
+		self.StatusLayout.addWidget(self.PeltierMonitorValue, 2, 4, 1, 1)
 		self.StatusLayout.addWidget(self.RefreshButton,3 ,5, 1, 2)
 		#self.StatusLayout.addWidget(self.RefreshButton,len(self.StatusList) ,1, 1, 1)
 
@@ -663,13 +665,4 @@ class SimplifiedMainWidget(QWidget):
 		## Testin some things out (end) #######
 		######################################	
 
-		#add a code to allow it run along
-
-		"""
-		if __name__ == "__main__":
-    import sys
-    app = QtWidgets.QApplication(sys.argv)
-    ui = Peltier(500)
-    sys.exit(app.exec_())
-		"""
 
