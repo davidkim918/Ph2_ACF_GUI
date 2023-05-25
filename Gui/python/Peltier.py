@@ -12,6 +12,9 @@ import time
 import logging
 
 class PeltierSignalGenerator():
+
+    
+
     def __init__(self):
         self.ser = serial.Serial(defaultPeltierPort, defaultPeltierBaud)
         self.commandDict = {'Input1':['0','1'],
@@ -38,7 +41,7 @@ class PeltierSignalGenerator():
                             }
         self.checksumError = ['*','X','X','X','X','X','X','X','X','c','0','^']
         self.buffer = [0,0,0,0,0,0,0,0,0,0,0,0]
-
+        self.timeout = 5 # if buff didnt receieve message from Plta within 5 seconds then, it print a waring
 
 
 
@@ -106,12 +109,21 @@ class PeltierSignalGenerator():
         connection = True
         buff = self.buffer.copy()
         print("start reading")#debug
-        if self.ser.in_waiting:
-            for i in range(len(buff)):
+        #the following if else statement has sever bug, it can cuase the issue like
+        #plta constantly turning on and off and unable to monitor the temperature
+        #debug tbd 5-25 Collin
+        #if self.ser.in_waiting:
+        start_time = time.time()
+        for i in range(len(buff)):
+            while self.ser.in_waiting < 1:
+                if time.time() - start_time >= self.timeout:
+                    print("cheak the power of PLTA")
+                    break
+            else:
                 buff[i] = self.ser.read(1).decode('utf-8')
-            print("reading finished") #debug
-        else:
-            print("No data available")
+        #print("reading finished") #debug
+        #else:
+        #    print("No power on plta controller")
             #add Qmessage here
 
 
