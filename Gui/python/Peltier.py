@@ -39,6 +39,9 @@ class PeltierSignalGenerator():
         self.checksumError = ['*','X','X','X','X','X','X','X','X','c','0','^']
         self.buffer = [0,0,0,0,0,0,0,0,0,0,0,0]
 
+
+
+
     def twosCompliment(self, num):
         return pow(2,32) - abs(num)
 
@@ -89,7 +92,11 @@ class PeltierSignalGenerator():
         try:
             for bit in command:
                 self.ser.write(bit.encode())
+            print("sending message from sendCommand()")
+            #if Peltier controller didn't turn on then it stuck at here
             message, passed = self.recieveMessage()
+            print("message(received Command)" + str(message))
+        #add the debug flag and and print the message and command.
             return message, passed
         except:
             return None,False
@@ -98,8 +105,16 @@ class PeltierSignalGenerator():
     def recieveMessage(self):
         connection = True
         buff = self.buffer.copy()
-        for i in range(len(buff)):
-            buff[i] = self.ser.read(1).decode('utf-8')
+        print("start reading")#debug
+        if self.ser.in_waiting:
+            for i in range(len(buff)):
+                buff[i] = self.ser.read(1).decode('utf-8')
+            print("reading finished") #debug
+        else:
+            print("No data available")
+            #add Qmessage here
+
+
         if buff == self.checksumError:
             connection = False
             return buff, connection
