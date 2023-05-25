@@ -1,3 +1,9 @@
+#5-19 test the code, to see if it can enter the interface, if yes then fix the LED issue after check the power for plta
+
+#5-19 error no attribute 'powerStatusValue'
+
+#5- 24: ryan we probabaly dont need the read temp and print it. Instead we to read the data at the background and kill the program if it exceed certain value
+# moving the setup up at top of __init__ it start to send message but powerstatusvalue issue is still exist
 from PyQt5 import QtCore
 from PyQt5 import QtSerialPort
 from PyQt5.QtCore import *
@@ -23,11 +29,20 @@ from Gui.GUIutils.DBConnection import *
 from Gui.GUIutils.FirmwareUtil import *
 from Gui.GUIutils.settings import *
 from Gui.python.ArduinoWidget import *
-#from Gui.python.Peltier import *
+from Gui.python.Peltier import *
 
 class SimplifiedMainWidget(QWidget):
+
+
+	polaritySignal = pyqtSignal(list)
+	tempReading = pyqtSignal(float)
+	powerReading = pyqtSignal(int)
+	setTempSignal = pyqtSignal(float)
+
+
 	def __init__(self, master):
-		super(SimplifiedMainWidget,self).__init__()
+		super().__init__()
+		self.setup()
 		self.master = master
 		self.connection = self.master.connection
 		self.LVpowersupply = self.master.LVpowersupply
@@ -44,7 +59,186 @@ class SimplifiedMainWidget(QWidget):
 		self.setupMainUI()
 		#self.createLogin()
 
-    #self.SimpModBox = SimpleModuleBox()
+		#for peltier controller
+		
+		
+
+
+	def setup(self):
+		try:
+			self.pelt = PeltierSignalGenerator()
+			#self.buttonEnable.connect(self.enableButtons)
+			self.polaritySignal.connect(self.setPolarityStatus)
+
+			# These should emit signals
+			self.pelt.sendCommand(self.pelt.createCommand('Set Type Define Write', ['0','0','0','0','0','0','0','0'])) # Allows set point to be set by computer software
+			self.pelt.sendCommand(self.pelt.createCommand('Control Type Write', ['0','0','0','0','0','0','0','1'])) # Temperature should be PID controlled
+			#add set temperature
+			#self.convertSetTempValueToList(5)
+			self.setTemp() #5 c now
+			self.pelt.sendCommand(self.pelt.createCommand('Power On/Off Write' ,['0','0','0','0','0','0','0','1'])) # Turn on the power by default
+			self.powerStatusValue = 1
+			
+
+			self.pelt.sendCommand(self.pelt.createCommand('Proportional Bandwidth Write', ['0','0','0','0','0','0', 'c', '8'])) # Set proportional bandwidth
+			message, _= self.pelt.sendCommand(self.pelt.createCommand('Control Output Polarity Read', ['0','0','0','0','0','0','0','0']))
+
+			#self.buttonEnable.emit()
+			self.polaritySignal.emit(message)
+
+			time.sleep(1) # Needed to avoid collision with temperature and power reading
+
+			#Start temperature and power monitoring
+
+			# Create QTimer that will call functions
+			self.timer = QTimer()
+			self.timer.timeout.connect(self.controllerMonitoring)
+			#self.tempReading.connect(lambda temp: self.currentTempDisplay.display(temp))   #we need to read it but not to display the color
+			self.power = 1 #debug
+			self.powerReading.connect(lambda power: self.setPowerStatus(power)) #debug by adding an intial value power=0
+			self.timer.start(500) # Perform monitoring functions every 500ms
+
+
+
+		except Exception as e:
+			print(e)
+			print("Error while attempting to setup Peltier Controller: ", e)
+		
+
+	#new note: I add a default value to the Power, such that I want to the code to run
+	# without touching the powerToggle	
+	def setPowerStatus(self, power=0):
+		if power == 1:
+			self.PeltierMonitorValue.setPixmap(self.greenledpixmap) #means power on
+			self.powerStatusValue =1
+
+		elif power == 0:
+			self.PeltierMonitorValue.setPixmap(self.redledpixmap) # means power off
+			self.powerStatusValue =0
+		else:
+			print("Unkown power status")
+		
+	#note for powerToggle intially under local expert mode this method should
+	#be excuted once I click the power on/off button. But right now we
+	#it to run automatically?
+
+	#new additional condition: set temperature is above current dew point (TBD)
+	
+	def powerToggle(self):
+		
+		if self.powerStatusValue == 0:
+			try:
+				self.pelt.sendCommand(self.pelt.createCommand('Power On/Off Write', ['0','0','0','0','0','0','0','1']))
+			except Exception as e:
+				print("Could not turn on controller due to error: ", e)
+		elif self.powerStatusValue == 1:
+			try:
+				self.pelt.sendCommand(self.pelt.createCommand('Power On/Off Write', ['0','0','0','0','0','0','0','0']))
+			except Exception as e:
+				print("Could not turn off controller due to error: " , e)
+
+	def setPolarityStatus(self, polarity):
+		if polarity[8] == '0':
+			self.polarityValue = 'HEAT WP1+ and WP2-'
+			#self.polarityButton.setText(self.polarityValue)
+		elif polarity[8] == '1':
+			self.polarityValue = 'HEAT WP2+ and WP1-'
+			#self.polarityButton.setText(self.polarityValue)
+		else:
+			print("Unexpected value sent back from polarity change function")
+
+	def polarityToggle(self):
+		if self.polarityValue == 'HEAT WP1+ and WP2-':
+			polarityCommand = '1'
+			self.polarityValue = 'HEAT WP2+ and WP1-'
+		elif self.polarityValue == 'HEAT WP2+ and WP1-':
+			polarityCommand = '0'
+			self.polarityValue = 'HEAT WP1+ and WP2-'
+		else:
+			print('Unexpected value read for polarity')
+			return
+		self.pelt.sendCommand(self.pelt.createCommand('Control Output Polarity Write', ['0','0','0','0','0','0','0', polarityCommand]))
+		self.polarityButton.setText(self.polarityValue) #FIXME Probably a better idea to read polarity from controller
+
+
+
+	def setTemp(self)-> None:
+		try:
+
+			#message = self.convertSetTempValueToList(self.setTempInput.value())
+			message = self.convertSetTempValueToList(5) #test
+		
+
+
+			self.pelt.sendCommand(self.pelt.createCommand('Fixed Desired Control Setting Write', message))
+			time.sleep(0.5) # Sleep to make sure controller has time to set temperature
+
+			message , _ = self.pelt.sendCommand(self.pelt.createCommand('Fixed Desired Control Setting Read', ['0','0','0','0','0','0','0','0']))
+			message = self.convertSetTempListToValue(message)
+
+			self.setTempSignal.emit(message)
+
+		except Exception as e:
+			print("Could not set Temperature: " , e)
+			#self.currentSetTemp.setText("N/a")
+
+	
+	
+	
+	def convertSetTempListToValue(self, temp: list)-> float:
+		temp = temp[1:9]
+		temp = "".join(temp)
+		temp = int(temp, 16)/100
+		if temp > 1000:
+			temp =  -1 * self.pelt.twosCompliment(temp)
+		return temp
+	def convertSetTempValueToList(self, temp: float) -> list:
+		value = ['0','0','0','0','0','0','0','0']
+		temp *= 100
+		temp = int(temp)
+		if temp < 0:
+			temp = self.pelt.twosCompliment(temp)
+		temp = self.pelt.convertToHex(temp)
+		temp = self.pelt.stringToList(temp)
+		cutoff = temp.index('x')
+		temp = temp[cutoff+1:]
+		for i, _ in enumerate(temp):
+			value[-(i+1)] = temp[-(i+1)]
+		return value
+
+		# Shutdown the peltier if it is on and stop threads that are running
+		# Currently not implemented
+	def shutdown(self):
+		try:
+			self.pelt.sendCommand(self.pelt.createCommand('Power On/Off Write', ['0','0','0','0','0','0','0','0']))
+		except Exception as e:
+			print("Could not turn off controller due to error: " , e)
+
+		try:
+			self.tempPower.readTemp = False
+		except AttributeError:
+			pass
+
+	def controllerMonitoring(self):
+		try:
+			message, passed = self.pelt.sendCommand(self.pelt.createCommand('Input1', ['0','0','0','0','0','0','0','0']))
+			temp = "".join(message[1:9])
+			temp = int(temp,16)/100
+			self.tempReading.emit(temp)
+
+			power, passed = self.pelt.sendCommand(self.pelt.createCommand('Power On/Off Read' ,['0','0','0','0','0','0','0','0']))
+			self.powerReading.emit(int(power[8]))
+			return
+		except Exception as e:
+			print(f"Could not read power/temperature due to error: {e}")
+			return    
+
+
+	
+	#--------------------------------- end of PLTA control codes
+
+
+	#self.SimpModBox = SimpleModuleBox()
 	def createLogin(self):
 		self.LoginGroupBox = QGroupBox("")
 		self.LoginGroupBox.setCheckable(False)
@@ -234,25 +428,37 @@ class SimplifiedMainWidget(QWidget):
 			self.ArduinoMonitorValue.setPixmap(self.redledpixmap)
 			
 		self.StatusList.append([self.ArduinoMonitorLabel,self.ArduinoMonitorValue])
-		try:
-			#self.Peltier = PeltierController(defaultPeltierPort, defaultPeltierBaud)
-			#self.Peltier.setTemperature(defaultPeltierSetTemp)
-			#self.Peltier.powerController(1)
-			time.sleep(0.5)
-			#self.PeltierPower = self.Peltier.checkPower()
-		except Exception as e:
-			print("Error while attempting to set Peltier", e)
+		
+		#note: the code at the following can be removed because the PLTA power check 
+		#is done within the setup().
+
+		#try:
+			#self.Peltier = PeltierController(defaultPeltierPort, defaultPeltierBaud) #use setup()
+			#self.Peltier.setTemperature(defaultPeltierSetTemp) #use setTemp()
+			#self.Peltier.powerController(1)    #use controllerMonitoring()
+			#the code at above are wrong need to fixed them
+
+
+			#time.sleep(0.5)
+			#self.PeltierPower = self.Peltier.checkPower()   #controllerMonitoring can check the poewr this will be removed in the future.
+			#self.getPower() #old code dont use
+			#print(self.PeltierPower + "self.PeltierPower debug")
+			#print(self.setPowerStatus() + "self.setPowerStatus()")
+
+		#except Exception as e:
+			#print("Error while attempting to set Peltier", e)
 			#self.PeltierPower = None
 
 
-		#self.PeltierMonitorLabel = QLabel()
-		#self.PeltierMonitorValue = QLabel()
+		self.PeltierMonitorLabel = QLabel()
+		self.PeltierMonitorValue = QLabel()
 		#self.PeltierMonitorValue.setText("Peltier Value")
-		#self.PeltierMonitorLabel.setText("Peltier Cooling")
-		#if int(self.PeltierPower) == 1:
-			#self.PeltierMonitorValue.setPixmap(self.greenledpixmap)
-		#else:
-			#self.PeltierMonitorValue.setPixmap(self.redledpixmap)
+		self.PeltierMonitorLabel.setText("Peltier Cooling")
+		#self.powerStatusValue == 1 #debug
+		if int(self.powerStatusValue) == 1:
+			self.PeltierMonitorValue.setPixmap(self.greenledpixmap)
+		else:
+			self.PeltierMonitorValue.setPixmap(self.redledpixmap)
 
 #self.StatusList.append([self.PeltierMonitorLabel, self.PeltierMonitorValue])
 
@@ -273,7 +479,7 @@ class SimplifiedMainWidget(QWidget):
 		self.StatusLayout.addWidget(self.ArduinoMonitorLabel,2,1,1,1)
 		self.StatusLayout.addWidget(self.ArduinoMonitorValue,2,2,1,1)
 		#self.StatusLayout.addWidget(self.ArduinoGroup.ArduinoMeasureValue)
-		#self.StatusLayout.addWidget(self.PeltierMonitorLabel, 2, 3, 1, 1)
+		self.StatusLayout.addWidget(self.PeltierMonitorLabel, 2, 3, 1, 1)
 		#self.StatusLayout.addWidget(self.PeltierMonitorValue, 2, 4, 1, 1)
 		self.StatusLayout.addWidget(self.RefreshButton,3 ,5, 1, 2)
 		#self.StatusLayout.addWidget(self.RefreshButton,len(self.StatusList) ,1, 1, 1)
@@ -455,4 +661,15 @@ class SimplifiedMainWidget(QWidget):
 
 		######################################
 		## Testin some things out (end) #######
-		######################################
+		######################################	
+
+		#add a code to allow it run along
+
+		"""
+		if __name__ == "__main__":
+    import sys
+    app = QtWidgets.QApplication(sys.argv)
+    ui = Peltier(500)
+    sys.exit(app.exec_())
+		"""
+
