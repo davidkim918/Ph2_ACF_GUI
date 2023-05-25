@@ -118,13 +118,14 @@ class PeltierSignalGenerator():
             while self.ser.in_waiting < 1:
                 if time.time() - start_time >= self.timeout:
                     print("cheak the power of PLTA")
+                    #add Qmessage here
+                    msg = QMessageBox()
+                    msg.information(None,"Error","Unable communicate to PLTA controller", QMessageBox.Ok)
                     break
             else:
                 buff[i] = self.ser.read(1).decode('utf-8')
-        #print("reading finished") #debug
-        #else:
-        #    print("No power on plta controller")
-            #add Qmessage here
+
+            
 
 
         if buff == self.checksumError:
