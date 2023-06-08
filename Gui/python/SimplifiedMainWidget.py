@@ -6,6 +6,8 @@
 # moving the setup up at top of __init__ it start to send message but powerstatusvalue issue is still exist
 
 #5-25 fix LED, add quit signal that do the power toggle(closeEvent() in SimplifiedMain()) when quit
+
+#6-1 debug to run test see "self.firmwareDescription = self.BeBoardWidget.getFirmwareDescription()" being run
 from PyQt5 import QtCore
 from PyQt5 import QtSerialPort
 from PyQt5.QtCore import *
@@ -168,7 +170,7 @@ class SimplifiedMainWidget(QWidget):
 		try:
 
 			#message = self.convertSetTempValueToList(self.setTempInput.value())
-			message = self.convertSetTempValueToList(5) #test
+			message = self.convertSetTempValueToList(5) # set the tempearature to 5 C by default for peltier controller
 		
 
 
@@ -388,6 +390,7 @@ class SimplifiedMainWidget(QWidget):
 
 		self.master.FwDict[firmwareName] = self.BeBoard
 		self.BeBoardWidget = SimpleBeBoardBox(self.BeBoard)
+		#self.BeBoardWidget = BeBoardBox(self.BeBoard)  # not gona work, we dont want to use feature in expert gui
 	
 		LogFileName = "{0}/Gui/.{1}.log".format(os.environ.get("GUI_dir"),firmwareName)
 		try:
@@ -544,8 +547,8 @@ class SimplifiedMainWidget(QWidget):
 			if module.getID() == "":
 				QMessageBox.information(None,"Error","No valid ID!", QMessageBox.Ok)
 				return
-
-		self.firmwareDescription = self.BeBoardWidget.getFirmwareDescription()
+		
+		self.firmwareDescription = self.BeBoardWidget.getFirmwareDescription() #debug: does this is being run? No!
 		if self.FwModule.getModuleByIndex(0) == None:
 			QMessageBox.information(None,"Error","No valid Module found!  If manually entering module number be sure to press 'Enter' on keyboard.", QMessageBox.Ok)
 			return
@@ -553,7 +556,7 @@ class SimplifiedMainWidget(QWidget):
 			self.info = [self.FwModule.getModuleByIndex(0).getOpticalGroupID(), "AllScan"]
 		else:
 			self.info = [self.FwModule.getModuleByIndex(0).getOpticalGroupID(), "QuickTest"]
-
+			
 		self.runFlag = True
 		self.RunTest = QtRunWindow(self.master, self.info, self.firmwareDescription)
 		self.LVpowersupply.setPoweringMode(defaultPowerMode)

@@ -92,7 +92,7 @@ class QtModule():
 			self.__moduleType = fwType
 		else:
 			self.__moduleType = "SingleSCC"
-		self.setupChips() 
+		self.setupChips()
 
 	def getModuleType(self):
 		return self.__moduleType
@@ -109,12 +109,16 @@ class QtModule():
 
 	#FIXME: This function needs to accept a dictionary of chipID : [VDDA, VDDD].  
 	def setupChips(self, **kwargs):
+		print("setupChips() starts") #debug
 		self.__chipDict = {}
 		if "chips" in kwargs.keys():
 			pass
 			return
 		#for key,value in kwargs.items():
 		#	if key=='VDDA':
+
+
+		print("__VDDAMap:" + str(self.__VDDAMap)) #debug
 
 		for i in ModuleLaneMap[self.__moduleType].keys():
 			
