@@ -1,5 +1,3 @@
-#6-1 Collin check if getFirmwareDescription (the one in SimpleBeBoardBox class)being run
-
 from PyQt5 import QtCore
 from PyQt5.QtCore import *
 from PyQt5.QtWidgets import (QApplication, QCheckBox, QComboBox, QDateTimeEdit,
@@ -607,6 +605,7 @@ class SimpleBeBoardBox(QWidget):
 			FwModule.setModuleID(module.getID())
 			FwModule.setFMCID(module.getFMCID())
 			FwModule.setModuleName(module.getSerialNumber())
+			print(module.getType(module.getSerialNumber())) # check it can return type, test TBD, it can't!
 			self.ChipWidgetDict[module] = ChipBox(module.getType(module.getSerialNumber()))# from updateList()
 			for chip in ModuleLaneMap[module.getType(module.getSerialNumber())].values():
 				print('chip status for chip {0} is {1}'.format(chip, self.ChipWidgetDict[module].getChipStatus(chip)))
