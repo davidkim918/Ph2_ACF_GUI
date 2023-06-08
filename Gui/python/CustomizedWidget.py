@@ -601,34 +601,12 @@ class SimpleBeBoardBox(QWidget):
 	def getModules(self):
 		return self.FilledModuleList
 
-	"""# this is creaded by Collin based on getFirmwareDescription() at above. This method might need to be delete getFirmwareDescription(self, **kwargs):
-		for index, module in enumerate(self.FilledModuleList):
-			if module.getSerialNumber() == "":
-				continue
-			FwModule = QtModule()
-			FwModule.setModuleID(module.getID())
-			FwModule.setFMCID(module.getFMCID())
-			FwModule.setModuleName(module.getSerialNumber())
-			#FwModule.setOpticalGroupID(module.getID())
-			for chip in ModuleLaneMap[module.getType()].values(): #new code base on getFirmwareDescription on the another class.
-				#if this doesnt work try use FirmwareDesprtion in another class
-				FwModule.setChipVDDA(chip, self.ChipWidgetDict[module].getVDDA(chip)) # do this test on 6-7 see if it fix the issue
-				print("module debug:" + str(module.getType(module.getSerialNumber()))) #6-6 debug, check if module is serial number
-				FwModule.setModuleType(module.getType(module.getSerialNumber())) # bug shows up
-			#for chip in module
-			self.firmware.addModule(index,FwModule)
-		return self.firmware
-	
-	""" 
-	#modified ver
-	#note: getType() need positional argument  serial number, which can be got from "module.getSerialNumber()"
 	def getFirmwareDescription(self, **kwargs):
 		for index, module in enumerate(self.ModuleList):
 			FwModule = QtModule()
 			FwModule.setModuleID(module.getID())
 			FwModule.setFMCID(module.getFMCID())
 			FwModule.setModuleName(module.getSerialNumber())
-			print(module.getType(module.getSerialNumber())) # check it can return type, test TBD, it can't!
 			self.ChipWidgetDict[module] = ChipBox(module.getType(module.getSerialNumber()))# from updateList()
 			for chip in ModuleLaneMap[module.getType(module.getSerialNumber())].values():
 				print('chip status for chip {0} is {1}'.format(chip, self.ChipWidgetDict[module].getChipStatus(chip)))
