@@ -1,13 +1,3 @@
-#5-19 test the code, to see if it can enter the interface, if yes then fix the LED issue after check the power for plta
-
-#5-19 error no attribute 'powerStatusValue'
-
-#5- 24: ryan we probabaly dont need the read temp and print it. Instead we to read the data at the background and kill the program if it exceed certain value
-# moving the setup up at top of __init__ it start to send message but powerstatusvalue issue is still exist
-
-#5-25 fix LED, add quit signal that do the power toggle(closeEvent() in SimplifiedMain()) when quit
-
-#6-1 debug to run test see "self.firmwareDescription = self.BeBoardWidget.getFirmwareDescription()" being run
 from PyQt5 import QtCore
 from PyQt5 import QtSerialPort
 from PyQt5.QtCore import *
@@ -548,7 +538,7 @@ class SimplifiedMainWidget(QWidget):
 				QMessageBox.information(None,"Error","No valid ID!", QMessageBox.Ok)
 				return
 		
-		self.firmwareDescription = self.BeBoardWidget.getFirmwareDescription() #debug: does this is being run? No!
+		self.firmwareDescription = self.BeBoardWidget.getFirmwareDescription()
 		if self.FwModule.getModuleByIndex(0) == None:
 			QMessageBox.information(None,"Error","No valid Module found!  If manually entering module number be sure to press 'Enter' on keyboard.", QMessageBox.Ok)
 			return
